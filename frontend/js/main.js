@@ -351,6 +351,7 @@ function loadHomePage() {
     app.innerHTML = `
         <section class="hero">
             <h1>Welcome to TechSphere Electronics</h1>
+            <h3>Not Biggest But the Best</h3>
             <p>Your one-stop shop for all electronic needs</p>
             ${!currentUser ? `
                 <div class="hero-buttons">

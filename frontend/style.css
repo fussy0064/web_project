@@ -26,6 +26,7 @@
 /* Show auth page content */
 .auth-page #authPageContent {
     display: block !important;
+    width: 100%;
 }
 
 /* ===== MAIN APP LAYOUT (when not auth page) ===== */
@@ -53,6 +54,7 @@ body:not(.auth-page) #authPageContent {
     max-width: 100%;
     box-shadow: none;
     padding: 20px;
+    width: 100%;
 }
 
 .auth-wrapper .title-text {
@@ -117,30 +119,31 @@ body:not(.auth-page) #authPageContent {
     display: none;
 }
 
-#signup:checked~.slider-tab,
-#signup-page:checked~.slider-tab {
+/* Fix for modal radio buttons */
+#loginRegisterModal #signup:checked ~ .slider-tab,
+#authPageContent #signup-page:checked ~ .slider-tab {
     left: 50%;
 }
 
-#signup:checked~label.signup,
-#signup-page:checked~label.signup {
+#loginRegisterModal #signup:checked ~ label.signup,
+#authPageContent #signup-page:checked ~ label.signup {
     color: #fff;
     cursor: default;
     user-select: none;
 }
 
-#signup:checked~label.login,
-#signup-page:checked~label.login {
+#loginRegisterModal #signup:checked ~ label.login,
+#authPageContent #signup-page:checked ~ label.login {
     color: #000;
 }
 
-#login:checked~label.signup,
-#login-page:checked~label.signup {
+#loginRegisterModal #login:checked ~ label.signup,
+#authPageContent #login-page:checked ~ label.signup {
     color: #000;
 }
 
-#login:checked~label.login,
-#login-page:checked~label.login {
+#loginRegisterModal #login:checked ~ label.login,
+#authPageContent #login-page:checked ~ label.login {
     cursor: default;
     user-select: none;
 }
@@ -212,12 +215,13 @@ body:not(.auth-page) #authPageContent {
 }
 
 .form-inner form .auth-btn {
-    height: 50px;
-    width: 100%;
+    height: 55px;
+    width: 36%;
     border-radius: 15px;
     position: relative;
     overflow: hidden;
-    margin-top: 20px;
+    margin-top: 20px auto;
+    display: block;
 }
 
 .form-inner form .auth-btn .btn-layer {
@@ -237,7 +241,7 @@ body:not(.auth-page) #authPageContent {
 .form-inner form .auth-btn input[type="submit"],
 .form-inner form .auth-btn button {
     height: 100%;
-    width: 100%;
+    width: 100;
     z-index: 1;
     position: relative;
     background: none;
@@ -452,6 +456,62 @@ main {
     color: #333;
 }
 
+/* ===== FORM STYLES (for non-auth forms) ===== */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #555;
+    font-family: 'Poppins', sans-serif;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #1a75ff;
+    box-shadow: 0 0 0 2px rgba(26, 117, 255, 0.1);
+}
+
+.error {
+    color: #e74c3c;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    min-height: 1.25rem;
+}
+
+small {
+    color: #7f8c8d;
+    font-size: 0.875rem;
+}
+
 /* ===== PROFILE MODAL STYLES ===== */
 .profile-header {
     display: flex;
@@ -553,62 +613,6 @@ main {
 
 .tab-pane.active {
     display: block;
-}
-
-/* ===== FORM STYLES ===== */
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-row {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.form-row .form-group {
-    flex: 1;
-    margin-bottom: 0;
-}
-
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #555;
-    font-family: 'Poppins', sans-serif;
-}
-
-input,
-select,
-textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-    outline: none;
-    border-color: #1a75ff;
-    box-shadow: 0 0 0 2px rgba(26, 117, 255, 0.1);
-}
-
-.error {
-    color: #e74c3c;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-    min-height: 1.25rem;
-}
-
-small {
-    color: #7f8c8d;
-    font-size: 0.875rem;
 }
 
 /* ===== ACTIVITY ITEMS ===== */
@@ -906,6 +910,32 @@ tr:hover {
 /* ===== TEMPLATE ELEMENTS ===== */
 template {
     display: none !important;
+}
+
+/* ===== FORGOT PASSWORD & RESET PASSWORD MODALS ===== */
+#forgotPasswordModal h2,
+#resetPasswordModal h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+}
+
+#forgotPasswordModal p,
+#resetPasswordModal p {
+    text-align: center;
+    margin-top: 1rem;
+    color: #666;
+}
+
+#forgotPasswordModal a,
+#resetPasswordModal a {
+    color: #1a75ff;
+    text-decoration: none;
+}
+
+#forgotPasswordModal a:hover,
+#resetPasswordModal a:hover {
+    text-decoration: underline;
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
