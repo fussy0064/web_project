@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSphere Electronics - User Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="auth-page">
+    <!-- If user is logged in, we'll remove auth-page class via JS -->
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">TechSphere</a>
+            <div class="nav-links" id="navLinks">
+                <a href="/">Home</a>
+                <a href="/products.html">Products</a>
+                <a href="/about.html">About</a>
+                <div id="authLinks">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div id="app"></div>
+    </main>
+
+    <!-- Auth Modals -->
+    <div id="authModals">
+        <!-- Sliding Login/Register Modal (for main app) -->
+        <div class="modal" id="loginRegisterModal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="auth-wrapper">
+                    <div class="title-text">
+                        <div class="title login">Login Form</div>
+                        <div class="title signup">Signup Form</div>
+                    </div>
+                    <div class="slide-controls">
+                        <input type="radio" name="slide" id="login" checked class="auth-radio">
+                        <input type="radio" name="slide" id="signup" class="auth-radio">
+                        <label for="login" class="slide login">Login</label>
+                        <label for="signup" class="slide signup">Signup</label>
+                        <div class="slider-tab"></div>
+                    </div>
+                    <div class="form-container">
+                        <div class="form-inner">
+                            <form action="#" class="login">
+                                <div class="field">
+                                    <input type="email" id="loginEmail" placeholder="Email Address" required>
+                                </div>
+                                <div class="field">
+                                    <input type="password" id="loginPassword" placeholder="Password" required>
+                                </div>
+                                <div class="pass-link">
+                                    <a href="#" id="forgotPasswordLink">Forgot password?</a>
+                                </div>
+                                <div class="field auth-btn">
+                                    <div class="btn-layer"></div>
+                                    <input type="submit" value="Login">
+                                </div>
+                                <div class="signup-link">
+                                    Not a member? <a href="#" id="showSignup">Signup now</a>
+                                </div>
+                            </form>
+                            <form action="#" class="signup">
+                                <div class="field">
+                                    <input type="text" id="registerName" placeholder="Full Name" required>
+                                </div>
+                                <div class="field">
+                                    <input type="email" id="registerEmail" placeholder="Email Address" required>
+                                </div>
+                                <div class="field">
+                                    <input type="password" id="registerPassword" placeholder="Password" required>
+                                </div>
+                                <div class="field">
+                                    <input type="password" id="registerConfirmPassword" placeholder="Confirm password" required>
+                                </div>
+                                <div class="field auth-btn">
+                                    <div class="btn-layer"></div>
+                                    <input type="submit" value="Signup">
+                                </div>
+                                <div class="signup-link">
+                                    Already a member? <a href="#" id="showLogin">Login now</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Forgot Password Modal -->
+        <div class="modal" id="forgotPasswordModal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Reset Password</h2>
+                <form id="forgotPasswordForm">
+                    <div class="form-group">
+                        <label for="resetEmail">Email</label>
+                        <input type="email" id="resetEmail" required>
+                        <div class="error" id="resetEmailError"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                </form>
+                <p>Remember your password? <a href="#" id="showLoginFromReset">Login here</a></p>
+            </div>
+        </div>
+        
+        <!-- Reset Password Modal -->
+        <div class="modal" id="resetPasswordModal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Set New Password</h2>
+                <form id="resetPasswordForm">
+                    <input type="hidden" id="resetToken">
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" required>
+                        <div class="error" id="newPasswordError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmNewPassword">Confirm New Password</label>
+                        <input type="password" id="confirmNewPassword" required>
+                        <div class="error" id="confirmNewPasswordError"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Reset Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content wide">
+            <span class="close">&times;</span>
+            <div class="profile-header">
+                <div class="avatar-container">
+                    <img src="" alt="Avatar" id="profileAvatar" class="avatar-large">
+                    <button class="btn btn-small" id="changeAvatarBtn">Change</button>
+                    <input type="file" id="avatarInput" accept="image/*" hidden>
+                </div>
+                <div class="profile-info">
+                    <h2 id="profileName"></h2>
+                    <p id="profileEmail"></p>
+                    <span class="badge" id="profileRole"></span>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" data-tab="profile">Profile</button>
+                <button class="tab" data-tab="security">Security</button>
+                <button class="tab" data-tab="activity">Activity</button>
+                <!-- Admin only -->
+                <button class="tab" data-tab="users" id="usersTab" style="display: none;">User Management</button>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Profile Tab -->
+                <div id="profileTab" class="tab-pane active">
+                    <form id="profileForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileFullName">Full Name</label>
+                                <input type="text" id="profileFullName">
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePhone">Phone</label>
+                                <input type="tel" id="profilePhone">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profileBio">Bio</label>
+                            <textarea id="profileBio" rows="3"></textarea>
+                        </div>
+                        
+                        <h3>Personal Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileDob">Date of Birth</label>
+                                <input type="date" id="profileDob">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileGender">Gender</label>
+                                <select id="profileGender">
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <h3>Address</h3>
+                        <div class="form-group">
+                            <label for="profileAddress">Address</label>
+                            <textarea id="profileAddress" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileCity">City</label>
+                                <input type="text" id="profileCity">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileState">State</label>
+                                <input type="text" id="profileState">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileCountry">Country</label>
+                                <input type="text" id="profileCountry">
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePostalCode">Postal Code</label>
+                                <input type="text" id="profilePostalCode">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+                
+                <!-- Security Tab -->
+                <div id="securityTab" class="tab-pane">
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" required>
+                            <div class="error" id="currentPasswordError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPasswordProfile">New Password</label>
+                            <input type="password" id="newPasswordProfile" required>
+                            <div class="error" id="newPasswordProfileError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmNewPasswordProfile">Confirm New Password</label>
+                            <input type="password" id="confirmNewPasswordProfile" required>
+                            <div class="error" id="confirmNewPasswordProfileError"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </form>
+                </div>
+                
+                <!-- Activity Tab -->
+                <div id="activityTab" class="tab-pane">
+                    <div id="activityList">
+                        <!-- Activities will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- User Management Tab (Admin only) -->
+                <div id="usersTabContent" class="tab-pane">
+                    <div class="admin-controls">
+                        <input type="text" id="searchUsers" placeholder="Search users..." class="search-input">
+                        <select id="roleFilter">
+                            <option value="">All Roles</option>
+                            <option value="customer">Customer</option>
+                            <option value="manager">Manager</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    
+                    <div id="usersTableContainer">
+                        <!-- Users table will be loaded here -->
+                    </div>
+                    
+                    <div class="pagination" id="usersPagination">
+                        <!-- Pagination will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sliding Login/Register Form (for auth page) -->
+    <div id="authPageContent" style="display: none;">
+        <div class="auth-wrapper">
+            <div class="title-text">
+                <div class="title login">Login Form</div>
+                <div class="title signup">Signup Form</div>
+            </div>
+            <div class="slide-controls">
+                <input type="radio" name="slide" id="login-page" checked class="auth-radio">
+                <input type="radio" name="slide" id="signup-page" class="auth-radio">
+                <label for="login-page" class="slide login">Login</label>
+                <label for="signup-page" class="slide signup">Signup</label>
+                <div class="slider-tab"></div>
+            </div>
+            <div class="form-container">
+                <div class="form-inner">
+                    <form action="#" class="login">
+                        <div class="field">
+                            <input type="email" id="loginEmailPage" placeholder="Email Address" required>
+                        </div>
+                        <div class="field">
+                            <input type="password" id="loginPasswordPage" placeholder="Password" required>
+                        </div>
+                        <div class="pass-link">
+                            <a href="#" id="forgotPasswordLinkPage">Forgot password?</a>
+                        </div>
+                        <div class="field auth-btn">
+                            <div class="btn-layer"></div>
+                            <input type="submit" value="Login">
+                        </div>
+                        <div class="signup-link">
+                            Not a member? <a href="#" id="showSignupPage">Signup now</a>
+                        </div>
+                    </form>
+                    <form action="#" class="signup">
+                        <div class="field">
+                            <input type="text" id="registerNamePage" placeholder="Full Name" required>
+                        </div>
+                        <div class="field">
+                            <input type="email" id="registerEmailPage" placeholder="Email Address" required>
+                        </div>
+                        <div class="field">
+                            <input type="password" id="registerPasswordPage" placeholder="Password" required>
+                        </div>
+                        <div class="field">
+                            <input type="password" id="registerConfirmPasswordPage" placeholder="Confirm password" required>
+                        </div>
+                        <div class="field auth-btn">
+                            <div class="btn-layer"></div>
+                            <input type="submit" value="Signup">
+                        </div>
+                        <div class="signup-link">
+                            Already a member? <a href="#" id="showLoginPage">Login now</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="/" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management Table Template -->
+    <template id="userRowTemplate">
+        <tr>
+            <td data-field="user_id"></td>
+            <td data-field="email"></td>
+            <td data-field="full_name"></td>
+            <td data-field="role">
+                <select class="role-select" data-user-id="">
+                    <option value="customer">Customer</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button class="btn btn-small btn-success save-role" style="display: none;">Save</button>
+            </td>
+            <td data-field="email_verified">
+                <span class="badge verified">Verified</span>
+                <span class="badge unverified">Unverified</span>
+            </td>
+            <td data-field="created_at"></td>
+            <td data-field="actions">
+                <button class="btn btn-small btn-danger delete-user">Delete</button>
+            </td>
+        </tr>
+    </template>
+
+    <!-- Activity Item Template -->
+    <template id="activityItemTemplate">
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i class="fas"></i>
+            </div>
+            <div class="activity-content">
+                <p class="activity-text"></p>
+                <small class="activity-time"></small>
+            </div>
+        </div>
+    </template>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
