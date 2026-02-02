@@ -350,7 +350,7 @@ function loadHomePage() {
     
     app.innerHTML = `
         <section class="hero">
-            <h1>Welcome to TechSphere Electronics</h1>
+            <h1>TechSphere Electronics</h1>
             <h3>Not Biggest But the Best</h3>
             <p>Your one-stop shop for all electronic needs</p>
             ${!currentUser ? `
@@ -384,7 +384,7 @@ function loadHomePage() {
             <div class="feature-card">
                 <i class="fas fa-shipping-fast fa-3x"></i>
                 <h3>Fast Delivery</h3>
-                <p>Get your products delivered within 2-3 business days</p>
+                <p>Get your products delivered As soon as possible</p>
             </div>
         </section>
     `;
