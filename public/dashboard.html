@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ElectroShop</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .order-card {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .order-items {
+            list-style: none;
+        }
+
+        .order-items li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <h1><a href="index.html">ElectroShop</a></h1>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                    <li><a href="#" id="logout-btn">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2>My Orders</h2>
+        <div id="orders-list">
+            <p>Loading orders...</p>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check auth (already in app.js but specific redirect logic here if needed)
+            const res = await fetch('api/auth/check_session.php');
+            const data = await res.json();
+            if (!data.authenticated) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load Orders
+            try {
+                const orderRes = await fetch('api/orders/history.php');
+                const orders = await orderRes.json();
+                const list = document.getElementById('orders-list');
+                list.innerHTML = '';
+
+                if (orders.length === 0) {
+                    list.innerHTML = '<p>No orders found.</p>';
+                    return;
+                }
+
+                orders.forEach(order => {
+                    const date = new Date(order.created_at).toLocaleDateString();
+                    let itemsHtml = '';
+                    order.items.forEach(item => {
+                        itemsHtml += `<li><span>${item.name} (x${item.quantity})</span> <span>$${item.price_at_purchase}</span></li>`;
+                    });
+
+                    list.innerHTML += `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <strong>Order #${order.id}</strong>
+                                <span>Date: ${date}</span>
+                                <span class="badge-${order.status}">${order.status}</span>
+                                <strong>Total: $${order.total_amount}</strong>
+                            </div>
+                            <ul class="order-items">
+                                ${itemsHtml}
+                            </ul>
+                        </div>
+                    `;
+                });
+            } catch (e) {
+                console.error(e);
+                document.getElementById('orders-list').innerHTML = '<p>Error loading orders.</p>';
+            }
+        });
+    </script>
+</body>
+
+</html>

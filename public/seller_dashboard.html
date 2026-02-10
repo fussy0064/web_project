@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - ElectroShop</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Sidebar Styles */
+        .seller-info {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .seller-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .seller-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .seller-email {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card:nth-child(2) {
+            border-left-color: #3498db;
+        }
+
+        .stat-card:nth-child(3) {
+            border-left-color: #27ae60;
+        }
+
+        .stat-card:nth-child(4) {
+            border-left-color: #e74c3c;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .stat-card:nth-child(1) .stat-icon {
+            background: var(--primary-color);
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: #3498db;
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: #27ae60;
+        }
+
+        .stat-card:nth-child(4) .stat-icon {
+            background: #e74c3c;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-change.positive {
+            color: #27ae60;
+        }
+
+        .stat-change.negative {
+            color: #e74c3c;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 15px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.2);
+        }
+
+        .action-btn i {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .action-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Notifications */
+        .notifications-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .notification-badge {
+            background: #e74c3c;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .notification-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background: #f0f7ff;
+            border-left: 4px solid #3498db;
+        }
+
+        .notification-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: #999;
+            white-space: nowrap;
+            margin-left: 15px;
+        }
+
+        /* Recent Orders */
+        .recent-orders {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .orders-table th {
+            text-align: left;
+            padding: 15px;
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .orders-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-shipped {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-delivered {
+            background: #c3e6cb;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* View All Button */
+        .view-all {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .view-all-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .view-all-btn:hover {
+            background: var(--dark-color);
+            transform: translateY(-2px);
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .orders-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <h1>
+                    <a href="seller_dashboard.html" class="logo">
+                        <i class="fas fa-bolt"></i>
+                        <span>ElectroShop Seller</span>
+                    </a>
+                </h1>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-store"></i> Shop Home</a></li>
+                    <li class="notification-dropdown">
+                        <a href="#" class="notification-bell" id="notificationBell">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count" id="notificationCount">0</span>
+                        </a>
+                        <div class="notification-dropdown-content" id="notificationDropdown">
+                            <div class="notification-header">
+                                <h4>Notifications</h4>
+                                <button id="markAllRead">Mark all read</button>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <!-- Notifications will be loaded here -->
+                                <div class="notification-empty">
+                                    <p>No new notifications</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Dashboard Title -->
+        <div class="dashboard-header">
+            <h2>Seller Dashboard</h2>
+            <p id="welcome-message">Welcome back! Here's your business overview.</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading dashboard...</p>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard-content" style="display: none;">
+            <div class="dashboard-container">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="seller-info">
+                        <div class="seller-avatar" id="sellerAvatar">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <h3 class="seller-name" id="sellerName">Loading...</h3>
+                        <p class="seller-email" id="sellerEmail">Loading...</p>
+                    </div>
+
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active" onclick="showSection('overview')">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard Overview</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="post_product.html" class="nav-link">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Post New Product</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="manage_products.html" class="nav-link">
+                                <i class="fas fa-boxes"></i>
+                                <span>Manage Products</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" onclick="showSection('orders')">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Manage Orders</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" onclick="showSection('inventory')">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Inventory</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="reports.html" class="nav-link">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Reports & Analytics</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" onclick="showSection('messages')">
+                                <i class="fas fa-comments"></i>
+                                <span>Customer Messages</span>
+                            </a>
+                        </li>
+                    </ul>
+                </aside>
+
+                <!-- Main Content -->
+                <div class="main-content">
+                    <!-- Stats Overview -->
+                    <section id="overview-section" class="dashboard-section">
+                        <div class="stats-grid" id="seller-stats">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title">Total Products</div>
+                                    <div class="stat-icon">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                </div>
+                                <div class="stat-value" id="total-products">0</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>12% from last month</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title">Active Orders</div>
+                                    <div class="stat-icon">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                </div>
+                                <div class="stat-value" id="active-orders">0</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>5 new today</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title">Available Stock</div>
+                                    <div class="stat-icon">
+                                        <i class="fas fa-cubes"></i>
+                                    </div>
+                                </div>
+                                <div class="stat-value" id="total-stock">0</div>
+                                <div class="stat-change negative">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>Update needed</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title">Total Revenue</div>
+                                    <div class="stat-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                </div>
+                                <div class="stat-value" id="total-revenue">TShs 0</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>24% growth</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="quick-actions">
+                            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                            <div class="actions-grid">
+                                <a href="post_product.html" class="action-btn">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span class="action-label">Add New Product</span>
+                                </a>
+                                <a href="#" class="action-btn" onclick="showSection('orders')">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span class="action-label">View Orders</span>
+                                </a>
+                                <a href="#" class="action-btn" onclick="showSection('inventory')">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    <span class="action-label">Check Stock</span>
+                                </a>
+                                <a href="#" class="action-btn" onclick="showSection('messages')">
+                                    <i class="fas fa-comments"></i>
+                                    <span class="action-label">View Messages</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Recent Orders -->
+                        <div class="recent-orders">
+                            <div class="section-header">
+                                <h3><i class="fas fa-history"></i> Recent Orders</h3>
+                                <a href="manage_orders.html" class="view-all-btn">View All</a>
+                            </div>
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-orders">
+                                    <!-- Recent orders will be loaded here -->
+                                </tbody>
+                            </table>
+                            <div class="view-all">
+                                <a href="manage_orders.html" class="view-all-btn">
+                                    <i class="fas fa-external-link-alt"></i> View All Orders
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Orders Section -->
+                    <section id="orders-section" class="dashboard-section" style="display: none;">
+                        <div class="section-header">
+                            <h3><i class="fas fa-shopping-cart"></i> Order Management</h3>
+                            <div class="filter-options">
+                                <select id="order-filter" onchange="filterOrders()">
+                                    <option value="all">All Orders</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="orders-content">
+                            <!-- Orders will be loaded here -->
+                        </div>
+                    </section>
+
+                    <!-- Inventory Section -->
+                    <section id="inventory-section" class="dashboard-section" style="display: none;">
+                        <div class="section-header">
+                            <h3><i class="fas fa-clipboard-list"></i> Inventory Management</h3>
+                            <button class="btn" onclick="updateLowStock()">
+                                <i class="fas fa-sync-alt"></i> Update Stock
+                            </button>
+                        </div>
+                        <div id="inventory-content">
+                            <!-- Inventory will be loaded here -->
+                        </div>
+                    </section>
+
+                    <!-- Messages Section -->
+                    <section id="messages-section" class="dashboard-section" style="display: none;">
+                        <div class="section-header">
+                            <h3><i class="fas fa-comments"></i> Customer Messages</h3>
+                            <button class="btn" onclick="loadMessages()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div id="messages-content">
+                            <!-- Messages will be loaded here -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Dropdown Style -->
+    <style>
+        .notification-dropdown {
+            position: relative;
+        }
+
+        .notification-bell {
+            position: relative;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .notification-dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 350px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .notification-dropdown:hover .notification-dropdown-content {
+            display: block;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .notification-header h4 {
+            margin: 0;
+            color: #333;
+        }
+
+        .notification-header button {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .notification-empty {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+
+    <script src="js/app.js"></script>
+    <script>
+        let currentSeller = null;
+        let notifications = [];
+        let notificationInterval = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            await checkAuthentication();
+
+            // Load dashboard data
+            await loadDashboardData();
+
+            // Start notification polling
+            startNotificationPolling();
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        async function checkAuthentication() {
+            try {
+                const res = await fetch('api/auth/check_session.php');
+                const data = await res.json();
+
+                if (!data.authenticated || data.role !== 'seller') {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentSeller = data.user;
+                updateSellerInfo(data.user);
+
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = 'index.html';
+            }
+        }
+
+        function updateSellerInfo(user) {
+            document.getElementById('sellerName').textContent = user.username;
+            document.getElementById('sellerEmail').textContent = user.email;
+            document.getElementById('sellerAvatar').innerHTML =
+                `<span>${user.username.charAt(0).toUpperCase()}</span>`;
+            document.getElementById('welcome-message').textContent =
+                `Welcome back, ${user.username}! Here's your business overview.`;
+        }
+
+        async function loadDashboardData() {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('dashboard-content');
+
+            try {
+                // Load stats
+                const statsRes = await fetch('api/seller/dashboard_stats.php');
+                if (statsRes.status === 403) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                const stats = await statsRes.json();
+
+                // Update stats
+                document.getElementById('total-products').textContent = stats.my_products || 0;
+                document.getElementById('active-orders').textContent = stats.active_orders || 0;
+                document.getElementById('total-stock').textContent = stats.total_stock || 0;
+                document.getElementById('total-revenue').textContent =
+                    `TShs ${parseFloat(stats.my_revenue || 0).toLocaleString()}`;
+
+                // Load recent orders
+                await loadRecentOrders();
+
+                // Load notifications
+                await loadNotifications();
+
+                loading.style.display = 'none';
+                content.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                loading.innerHTML = `
+                    <div style="color: #e74c3c;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                        <h3>Error loading dashboard</h3>
+                        <p>Please try refreshing the page</p>
+                        <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Refresh Page
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadRecentOrders() {
+            try {
+                const res = await fetch('api/seller/recent_orders.php');
+                const orders = await res.json();
+
+                const tableBody = document.getElementById('recent-orders');
+                if (orders.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: #666;">
+                                <i class="fas fa-shopping-cart" style="font-size: 2rem; margin-bottom: 10px; display: block; color: #ddd;"></i>
+                                No recent orders found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tableBody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td><strong>#${order.id.toString().padStart(6, '0')}</strong></td>
+                        <td>${order.customer_name || 'Customer'}</td>
+                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>TShs ${parseFloat(order.total).toLocaleString()}</td>
+                        <td>
+                            <span class="order-status status-${order.status.toLowerCase()}">
+                                ${order.status}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-small" onclick="viewOrder(${order.id})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Add status styling
+                document.querySelectorAll('.status-pending').forEach(el => {
+                    el.className = 'order-status status-pending';
+                });
+                document.querySelectorAll('.status-processing').forEach(el => {
+                    el.className = 'order-status status-processing';
+                });
+                document.querySelectorAll('.status-shipped').forEach(el => {
+                    el.className = 'order-status status-shipped';
+                });
+                document.querySelectorAll('.status-delivered').forEach(el => {
+                    el.className = 'order-status status-delivered';
+                });
+                document.querySelectorAll('.status-cancelled').forEach(el => {
+                    el.className = 'order-status status-cancelled';
+                });
+
+            } catch (error) {
+                console.error('Error loading recent orders:', error);
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const res = await fetch('api/seller/notifications.php');
+                const data = await res.json();
+                notifications = data.notifications || [];
+
+                updateNotificationCount(notifications.filter(n => !n.is_read).length);
+                updateNotificationList(notifications);
+
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        function updateNotificationCount(count) {
+            document.getElementById('notificationCount').textContent = count;
+        }
+
+        function updateNotificationList(notifications) {
+            const list = document.getElementById('notificationList');
+
+            if (notifications.length === 0) {
+                list.innerHTML = `
+                    <div class="notification-empty">
+                        <p>No new notifications</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = notifications.map(notif => `
+                <div class="notification-item ${notif.is_read ? '' : 'unread'}" 
+                     onclick="viewNotification(${notif.id}, '${notif.type}')">
+                    <div class="notification-content">
+                        <div class="notification-text">
+                            <div class="notification-title">${notif.title}</div>
+                            <div class="notification-message">${notif.message}</div>
+                        </div>
+                        <div class="notification-time">
+                            ${formatTime(notif.created_at)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatTime(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diffMs = now - time;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return time.toLocaleDateString();
+        }
+
+        function startNotificationPolling() {
+            // Poll for new notifications every 30 seconds
+            notificationInterval = setInterval(async () => {
+                await loadNotifications();
+            }, 30000);
+        }
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Show selected section
+            document.getElementById(`${sectionId}-section`).style.display = 'block';
+
+            // Update active nav
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Mark the appropriate nav as active
+            if (sectionId === 'overview') {
+                document.querySelector('.nav-link[onclick*="overview"]').classList.add('active');
+            } else {
+                document.querySelector(`.nav-link[onclick*="${sectionId}"]`).classList.add('active');
+            }
+
+            // Load section data if needed
+            switch (sectionId) {
+                case 'orders':
+                    loadOrdersSection();
+                    break;
+                case 'inventory':
+                    loadInventorySection();
+                    break;
+                case 'messages':
+                    loadMessagesSection();
+                    break;
+            }
+
+            return false;
+        }
+
+        async function loadOrdersSection() {
+            try {
+                const res = await fetch('api/seller/all_orders.php');
+                const orders = await res.json();
+
+                const content = document.getElementById('orders-content');
+                content.innerHTML = `
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Products</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(order => `
+                                <tr>
+                                    <td><strong>#${order.id.toString().padStart(6, '0')}</strong></td>
+                                    <td>${order.customer_name || 'Customer'}</td>
+                                    <td>${order.item_count} items</td>
+                                    <td>TShs ${parseFloat(order.total).toLocaleString()}</td>
+                                    <td>
+                                        <select class="status-select" data-order-id="${order.id}" onchange="updateOrderStatus(${order.id}, this.value)">
+                                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                            <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                        </select>
+                                    </td>
+                                    <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        <button class="btn-small" onclick="viewOrderDetails(${order.id})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-small" onclick="sendMessage(${order.customer_id})">
+                                            <i class="fas fa-envelope"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('orders-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 15px; color: #e74c3c;"></i>
+                        <p>Error loading orders. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const res = await fetch('api/seller/update_order_status.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderId, status: status })
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    showNotification(`Order status updated to ${status}`, 'success');
+
+                    // Reload recent orders in overview
+                    await loadRecentOrders();
+
+                } else {
+                    showNotification('Failed to update order status', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                showNotification('Error updating order status', 'error');
+            }
+        }
+
+        function viewOrder(orderId) {
+            // Navigate to order details page
+            window.location.href = `order_details.html?id=${orderId}`;
+        }
+
+        function viewNotification(notificationId, type) {
+            // Mark as read
+            fetch(`api/seller/mark_notification_read.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notification_id: notificationId })
+            });
+
+            // Handle based on notification type
+            switch (type) {
+                case 'new_order':
+                    showSection('orders');
+                    break;
+                case 'low_stock':
+                    showSection('inventory');
+                    break;
+                case 'customer_message':
+                    showSection('messages');
+                    break;
+            }
+
+            // Reload notifications
+            loadNotifications();
+        }
+
+        function setupEventListeners() {
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await fetch('api/auth/logout.php');
+                    if (notificationInterval) clearInterval(notificationInterval);
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            });
+
+            // Mark all notifications as read
+            document.getElementById('markAllRead')?.addEventListener('click', async () => {
+                try {
+                    await fetch('api/seller/mark_all_notifications_read.php', {
+                        method: 'POST'
+                    });
+                    await loadNotifications();
+                } catch (error) {
+                    console.error('Error marking notifications read:', error);
+                }
+            });
+
+            // Show notification dropdown on hover
+            const bell = document.getElementById('notificationBell');
+            const dropdown = document.getElementById('notificationDropdown');
+
+            bell.addEventListener('mouseenter', () => {
+                dropdown.style.display = 'block';
+            });
+
+            bell.addEventListener('mouseleave', () => {
+                setTimeout(() => {
+                    if (!dropdown.matches(':hover')) {
+                        dropdown.style.display = 'none';
+                    }
+                }, 100);
+            });
+
+            dropdown.addEventListener('mouseleave', () => {
+                dropdown.style.display = 'none';
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+
+            // Add styles
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+                color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460'};
+                padding: 15px 20px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                z-index: 1000;
+                animation: slideInRight 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+
+            // Add to body
+            document.body.appendChild(notification);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (notificationInterval) clearInterval(notificationInterval);
+        });
+    </script>
+</body>
+
+</html>
