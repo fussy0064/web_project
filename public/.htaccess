@@ -1,0 +1,16 @@
+RewriteEngine On
+RewriteBase /electroshop/
+
+# API routing
+RewriteRule ^api/(.*)$ api/index.php?route=$1 [QSA,L]
+
+# Security - protect config file
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Remove .php extension
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]

@@ -520,7 +520,7 @@
         <section class="modern-hero">
             <div class="hero-content">
                 <h2>Discover Amazing Electronics</h2>
-                <p>Shop the latest gadgets, premium electronics, and tech accessories from trusted sellers worldwide.
+                <p>Shop the latest gadgets, premium electronics, and tech accessories.
                 </p>
                 <div class="search-bar">
                     <input type="text" id="search-input" placeholder="Search for laptops, smartphones, accessories...">
@@ -557,7 +557,7 @@
                 <div class="profile-avatar" id="user-avatar">U</div>
                 <div class="profile-info">
                     <h3 id="user-fullname">Welcome Back!</h3>
-                    <p>Manage your profile, track orders, and view purchase history.</p>
+                    <p>Not biggest But The Best</p>
                     <div class="profile-stats">
                         <div class="stat-item">
                             <div class="stat-number" id="order-count">0</div>
@@ -576,27 +576,89 @@
             </div>
         </section>
 
-        <!-- Products Section -->
-        <section id="products">
-            <div class="section-header">
-                <h3>Featured Electronics</h3>
-                <div class="sort-options">
-                    <select id="sort-select">
-                        <option value="newest">Newest First</option>
-                        <option value="price_low">Price: Low to High</option>
-                        <option value="price_high">Price: High to Low</option>
-                        <option value="popular">Most Popular</option>
-                    </select>
-                </div>
-            </div>
+        <style>
+            /* Style only for the select element */
+            #sort-select {
+                /* Basic styling */
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
 
-            <div id="product-list" class="product-grid">
-                <!-- Products will be loaded here -->
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Loading amazing products...</p>
+                /* Size and spacing */
+                width: 220px;
+                padding: 12px 45px 12px 20px;
+
+                /* Typography */
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 16px;
+                font-weight: 500;
+                color: #2d3748;
+
+                /* Background and border */
+                background-color: #f8f9fa;
+                border: 2px solid #e2e8f0;
+                border-radius: 8px;
+
+                /* Custom dropdown arrow */
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 15px center;
+                background-size: 18px;
+
+                /* Cursor */
+                cursor: pointer;
+
+                /* Animation */
+                transition: all 0.3s ease;
+            }
+
+            /* Hover state */
+            #sort-select:hover {
+                border-color: #1eff00;
+                background-color: white;
+                box-shadow: 0 4px 12px rgba(0, 102, 255, 0.1);
+            }
+
+            /* Focus state */
+            #sort-select:focus {
+                outline: none;
+                border-color: #151615;
+                box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+            }
+
+            /* Options styling */
+            #sort-select option {
+                padding: 10px;
+                background-color: white;
+                color: #333;
+            }
+        </style>
+        </head>
+
+        <body>
+            <!-- Your original HTML -->
+            <section id="products">
+                <div class="section-header">
+                    <h3>Featured Electronics</h3>
+                    <div class="sort-options">
+                        <select id="sort-select">
+                            <option value="newest">Newest</option>
+                            <option value="price_low">Price: Low to High</option>
+                            <option value="price_high">Price: High to Low</option>
+                            <option value="popular">Most Popular</option>
+                        </select>
+                    </div>
                 </div>
+            </section>
+        </body>
+
+        <div id="product-list" class="product-grid">
+            <!-- Products will be loaded here -->
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading amazing products...</p>
             </div>
+        </div>
         </section>
 
         <!-- Quick View Modal -->
@@ -620,14 +682,14 @@
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <a href="index.html">Home</a>
-                    <a href="cart.html">Shopping Cart</a>
+                    <a href="cart.html">Shop Cart</a>
                     <a href="login.html">Login</a>
                     <a href="register.html">Register</a>
                 </div>
                 <div class="footer-section">
                     <h4>Contact</h4>
                     <p><i class="fas fa-envelope"></i> support@electroshop.com</p>
-                    <p><i class="fas fa-phone"></i> +255 123 456 789</p>
+                    <p><i class="fas fa-phone"></i> +255 759 050 666</p>
                 </div>
             </div>
             <p class="copyright">&copy; 2026 ElectroShop. All rights reserved.</p>
@@ -691,11 +753,19 @@
 
             try {
                 // Fetch products from API (products posted by sellers)
-                const url = `api/products/get_products.php?category=${category}&search=${search}`;
+                let url = 'api/products/get_products.php';
+                const params = new URLSearchParams();
+                if (category !== 'all') params.append('category', category);
+                if (search) params.append('search', search);
+
+                if (params.toString()) url += '?' + params.toString();
+
                 const res = await fetch(url);
                 const products = await res.json();
 
-                if (products.length === 0) {
+                const productList = document.getElementById('product-list');
+
+                if (!Array.isArray(products) || products.length === 0) {
                     productList.innerHTML = `
                         <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
                             <i class="fas fa-box-open" style="font-size: 3rem; color: #ddd; margin-bottom: 20px;"></i>
@@ -708,37 +778,34 @@
 
                 // Render products
                 productList.innerHTML = products.map(product => `
-                    <div class="product-card" data-id="${product.id}">
+                    <div class="product-card">
                         <div class="product-image">
                             ${product.image_url ?
-                        `<img src="${product.image_url}" alt="${product.name}" loading="lazy">` :
-                        `<i class="fas fa-image" style="font-size: 3rem; color: #ccc;"></i>`
+                        `<img src="${product.image_url}" alt="${product.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">` :
+                        `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f0f0f0;color:#ccc;"><i class="fas fa-image fa-3x"></i></div>`
                     }
                             <div class="seller-badge">
-                                <i class="fas fa-store"></i> ${product.seller_name || 'Seller'}
+                                <i class="fas fa-store"></i> ${product.seller_name || 'Verified Seller'}
                             </div>
                         </div>
                         <div class="product-info">
                             <div class="product-category">
-                                <i class="fas fa-tag"></i> ${getCategoryName(product.category_id)}
+                                ${product.category_id ? getCategoryName(product.category_id) : 'Electronics'}
                             </div>
                             <h3 class="product-name">${product.name}</h3>
-                            <p class="product-description">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</p>
+                            <p class="product-description">${product.description ? (product.description.substring(0, 80) + (product.description.length > 80 ? '...' : '')) : ''}</p>
                             <div class="product-price">TShs ${parseFloat(product.price).toLocaleString()}</div>
+                            
                             <div class="product-meta">
-                                <div class="stock-status ${product.stock_quantity > 0 ? 'stock-in' : 'stock-out'}">
+                                <span class="stock-status ${product.stock_quantity > 0 ? 'stock-in' : 'stock-out'}">
                                     <i class="fas ${product.stock_quantity > 0 ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                                    ${product.stock_quantity > 0 ? `${product.stock_quantity} in stock` : 'Out of stock'}
-                                </div>
-                                <div class="product-actions">
-                                    <button class="quick-view" onclick="showQuickView(${product.id})" title="Quick View">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="add-to-cart" onclick="addToCart(${product.id})" ${product.stock_quantity === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-                                        <i class="fas fa-cart-plus"></i> Add to Cart
-                                    </button>
-                                </div>
+                                    ${product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                                </span>
                             </div>
+
+                            <button class="add-to-cart" onclick="addToCart(${product.id})" ${product.stock_quantity <= 0 ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            </button>
                         </div>
                     </div>
                 `).join('');

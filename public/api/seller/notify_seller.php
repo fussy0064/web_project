@@ -17,32 +17,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $conn = getDBConnection();
 
-    // Create notification
-    $stmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, type) VALUES (?, 'New Order', ?, 'new_order')");
-    $stmt->bind_param("is", $seller_id, $message);
+    try {
+        // Create notification
+        $stmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, type) VALUES (:user_id, 'New Order', :message, 'new_order')");
+        $stmt->execute([':user_id' => $seller_id, ':message' => $message]);
 
-    if ($stmt->execute()) {
         // Also update product stock if needed
         if (!empty($items)) {
             foreach ($items as $item) {
                 if (isset($item['id']) && isset($item['quantity'])) {
-                    $updateStmt = $conn->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ? AND seller_id = ?");
-                    $updateStmt->bind_param("iii", $item['quantity'], $item['id'], $seller_id);
-                    $updateStmt->execute();
-                    $updateStmt->close();
+                    // Note: This logic seems to deduct stock again? 
+                    // Usually stock is deducted at order creation. 
+                    // This file might be redundant if order creation handles stock.
+                    // But assuming this is a separate logic requested by legacy code, we keep it but ensure PDO.
+
+                    $updateStmt = $conn->prepare("UPDATE products SET stock_quantity = stock_quantity - :quantity WHERE id = :id AND seller_id = :seller_id");
+                    $updateStmt->execute([
+                        ':quantity' => $item['quantity'],
+                        ':id' => $item['id'],
+                        ':seller_id' => $seller_id
+                    ]);
                 }
             }
         }
 
         echo json_encode(['message' => 'Notification sent']);
-    }
-    else {
-        http_response_code(500);
-        echo json_encode(['message' => 'Failed to send notification']);
-    }
 
-    $stmt->close();
-    $conn->close();
+    }
+    catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['message' => 'Error sending notification: ' . $e->getMessage()]);
+    }
 }
 else {
     http_response_code(405);

@@ -1,58 +1,88 @@
 <?php
-header('Content-Type: application/json');
-require_once __DIR__ . '/../../../config/db.php';
+require_once '../config.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['message' => 'Method Not Allowed']);
-    exit;
-}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
 
-$data = json_decode(file_get_contents('php://input'), true);
+    $username = $data['username'] ?? '';
+    $email = $data['email'] ?? '';
+    $password = $data['password'] ?? '';
 
-if (!isset($data['username']) || !isset($data['email']) || !isset($data['password'])) {
-    http_response_code(400);
-    echo json_encode(['message' => 'Missing required fields']);
-    exit;
-}
+    // Validation
+    if (empty($username) || empty($email) || empty($password)) {
+        http_response_code(400);
+        echo json_encode(['message' => 'All fields are required']);
+        exit;
+    }
 
-$username = trim($data['username']);
-$email = trim($data['email']);
-$password = $data['password'];
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Invalid email format']);
+        exit;
+    }
 
-// Basic validation
-if (empty($username) || empty($email) || empty($password)) {
-    http_response_code(400);
-    echo json_encode(['message' => 'All fields are required']);
-    exit;
-}
+    if (strlen($password) < 6) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Password must be at least 6 characters']);
+        exit;
+    }
 
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    http_response_code(400);
-    echo json_encode(['message' => 'Invalid email format']);
-    exit;
-}
+    // $conn is already available from config.php, but we can call getDBConnection() if strictly needed.
+    // However, config.php creates $conn. Let's use the $conn from config or get a new one to be safe/explicit if code style prefers.
+    // Given config.php content: $conn = getDBConnection();
+    // We can just use $conn.
 
-// Check if user exists
-$stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-$stmt->execute([$email]);
-if ($stmt->fetch()) {
-    http_response_code(409);
-    echo json_encode(['message' => 'Email already registered']);
-    exit;
-}
+    if (!isset($conn)) {
+        $conn = getDBConnection();
+    }
 
-// Hash password
-$password_hash = password_hash($password, PASSWORD_BCRYPT);
+    try {
+        // Check if user already exists
+        $checkStmt = $conn->prepare("SELECT id FROM users WHERE email = :email OR username = :username");
+        $checkStmt->execute([':email' => $email, ':username' => $username]);
 
-// Insert user
-$stmt = $conn->prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)");
-if ($stmt->execute([$username, $email, $password_hash])) {
-    http_response_code(201);
-    echo json_encode(['message' => 'User registered successfully']);
+        if ($checkStmt->rowCount() > 0) {
+            http_response_code(409);
+            echo json_encode(['message' => 'Username or email already exists']);
+            exit;
+        }
+
+        // Hash password
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        // Insert new user
+        $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash, role) VALUES (:username, :email, :password, 'customer')");
+
+        $stmt->execute([
+            ':username' => $username,
+            ':email' => $email,
+            ':password' => $hashedPassword
+        ]);
+
+        $user_id = $conn->lastInsertId();
+
+        // Log registration
+        try {
+            $logStmt = $conn->prepare("INSERT INTO system_logs (user_id, action, description) VALUES (:user_id, 'registration', 'New user registered')");
+            $logStmt->execute([':user_id' => $user_id]);
+        }
+        catch (PDOException $e) {
+        // Ignore log error
+        }
+
+        echo json_encode([
+            'message' => 'Registration successful',
+            'user_id' => $user_id
+        ]);
+
+    }
+    catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['message' => 'Registration failed: ' . $e->getMessage()]);
+    }
 }
 else {
-    http_response_code(500);
-    echo json_encode(['message' => 'Registration failed']);
+    http_response_code(405);
+    echo json_encode(['message' => 'Method not allowed']);
 }
 ?>

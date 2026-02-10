@@ -1,11 +1,11 @@
 /* Update CSS Variables for Modern Look */
 :root {
-    --primary-color: #2E7D32;
+    --primary-color: #2e437d;
     /* Green Theme */
-    --secondary-color: #81C784;
+    --secondary-color: #14e01e;
     --accent-color: #FFC107;
     --light-color: #f1f8e9;
-    --dark-color: #1b5e20;
+    --dark-color: #161a17;
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
     /* Modern additions */
@@ -267,7 +267,7 @@ form {
 }
 
 .btn:hover {
-    background: linear-gradient(135deg, #1b5e20 0%, #2E7D32 100%);
+    background: linear-gradient(135deg, #1b5e20 0%, #2e537d 100%);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
 }

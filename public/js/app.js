@@ -17,7 +17,7 @@ async function checkAuth() {
             if (userLinks) userLinks.style.display = 'block';
 
             // Role based links
-            if (data.user.role === 'admin1') {
+            if (data.user.role === 'admin') {
                 if (userLinks && !userLinks.querySelector('a[href="admin_dashboard.html"]')) {
                     const adminLink = document.createElement('a');
                     adminLink.href = 'admin_dashboard.html';
@@ -25,13 +25,21 @@ async function checkAuth() {
                     adminLink.style.marginRight = '10px';
                     userLinks.prepend(adminLink);
                 }
-            } else if (data.user.role === 'admin2') {
+            } else if (data.user.role === 'seller') {
                 if (userLinks && !userLinks.querySelector('a[href="seller_dashboard.html"]')) {
                     const sellerLink = document.createElement('a');
                     sellerLink.href = 'seller_dashboard.html';
                     sellerLink.textContent = 'Seller Dashboard';
                     sellerLink.style.marginRight = '10px';
                     userLinks.prepend(sellerLink);
+                }
+            } else if (data.user.role === 'customer') {
+                if (userLinks && !userLinks.querySelector('a[href="customer_dashboard.html"]')) {
+                    const dashboardLink = document.createElement('a');
+                    dashboardLink.href = 'customer_dashboard.html';
+                    dashboardLink.textContent = 'My Dashboard';
+                    dashboardLink.style.marginRight = '10px';
+                    userLinks.prepend(dashboardLink);
                 }
             }
 

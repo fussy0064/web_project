@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - ElectroShop</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Sidebar Styles */
+        .user-info {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .user-email {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            background: var(--primary-color);
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        /* Recent Orders */
+        .recent-orders {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .orders-table th {
+            text-align: left;
+            padding: 15px;
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .orders-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-shipped {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-delivered {
+            background: #c3e6cb;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <h1>
+                    <a href="index.html" class="logo">
+                        <i class="fas fa-bolt"></i>
+                        <span>ElectroShop</span>
+                    </a>
+                </h1>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart</a></li>
+                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="dashboard-header" style="margin: 30px 0;">
+            <h2>My Dashboard</h2>
+            <p>Manage your account and view order history</p>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading your dashboard...</p>
+        </div>
+
+        <div id="dashboard-content" style="display: none;">
+            <div class="dashboard-container">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3 class="user-name" id="userName">User</h3>
+                        <p class="user-email" id="userEmail">user@example.com</p>
+                    </div>
+
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active" onclick="showSection('overview', event)">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" onclick="showSection('orders', event)">
+                                <i class="fas fa-shopping-bag"></i> My Orders
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="profile.html" class="nav-link">
+                                <i class="fas fa-user-circle"></i> Profile Settings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="cart.html" class="nav-link">
+                                <i class="fas fa-shopping-cart"></i> Cart
+                            </a>
+                        </li>
+                    </ul>
+                </aside>
+
+                <!-- Main Content -->
+                <div class="main-content">
+
+                    <!-- Overview Section -->
+                    <section id="overview-section">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title">Total Orders</div>
+                                    <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+                                </div>
+                                <div class="stat-value" id="total-orders">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title">Total Spent</div>
+                                    <div class="stat-icon" style="background: #27ae60;"><i class="fas fa-wallet"></i>
+                                    </div>
+                                </div>
+                                <div class="stat-value" id="total-spent">TShs 0</div>
+                            </div>
+                        </div>
+
+                        <div class="recent-orders" style="margin-top: 30px;">
+                            <h3 style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Recent
+                                Orders</h3>
+                            <div class="table-responsive">
+                                <table class="orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Date</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recent-orders-list">
+                                        <!-- Recent orders loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- All Orders Section -->
+                    <section id="orders-section" style="display: none;">
+                        <div class="recent-orders">
+                            <h3 style="margin-bottom: 20px;">All Orders</h3>
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Date</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-orders-list">
+                                    <!-- All orders loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadDashboard();
+        });
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('api/auth/check_session.php');
+                const data = await res.json();
+
+                if (!data.authenticated) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Update Sidebar Info
+                document.getElementById('userName').textContent = data.user.username;
+                document.getElementById('userEmail').textContent = data.user.email;
+                document.getElementById('userAvatar').innerHTML = `<span>${data.user.username.charAt(0).toUpperCase()}</span>`;
+
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function loadDashboard() {
+            try {
+                // Fetch orders history
+                const res = await fetch('api/orders/history.php');
+                const orders = await res.json();
+
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard-content').style.display = 'block';
+
+                if (!Array.isArray(orders)) return;
+
+                // Stats
+                document.getElementById('total-orders').textContent = orders.length;
+                const totalSpent = orders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+                document.getElementById('total-spent').textContent = 'TShs ' + totalSpent.toLocaleString();
+
+                // Recent Orders (First 5)
+                const recentOrders = orders.slice(0, 5);
+                const recentList = document.getElementById('recent-orders-list');
+
+                if (recentOrders.length === 0) {
+                    recentList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #888;">No recent orders</td></tr>';
+                } else {
+                    recentList.innerHTML = recentOrders.map(order => `
+                        <tr>
+                            <td>#${order.order_number || order.id}</td>
+                            <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                            <td>TShs ${parseFloat(order.total).toLocaleString()}</td>
+                            <td><span class="order-status status-${order.status}">${order.status}</span></td>
+                            <td><button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="viewOrder(${order.id})">View</button></td>
+                        </tr>
+                    `).join('');
+                }
+
+                // All Orders
+                const allList = document.getElementById('all-orders-list');
+                if (orders.length === 0) {
+                    allList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #888;">No orders found</td></tr>';
+                } else {
+                    allList.innerHTML = orders.map(order => `
+                        <tr>
+                            <td>#${order.order_number || order.id}</td>
+                            <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                            <td>${order.items ? order.items.length : 'N/A'} items</td>
+                            <td>TShs ${parseFloat(order.total).toLocaleString()}</td>
+                            <td><span class="order-status status-${order.status}">${order.status}</span></td>
+                            <td><button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="viewOrder(${order.id})">View Details</button></td>
+                        </tr>
+                    `).join('');
+                }
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function showSection(sectionId, event) {
+            if (event) event.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (sectionId === 'overview') {
+                document.getElementById('overview-section').style.display = 'block';
+                document.getElementById('orders-section').style.display = 'none';
+            } else if (sectionId === 'orders') {
+                document.getElementById('overview-section').style.display = 'none';
+                document.getElementById('orders-section').style.display = 'block';
+            }
+        }
+
+        function viewOrder(id) {
+            // Ideally navigate to a dedicated order details page
+            // window.location.href = `order_details.html?id=${id}`;
+            alert('View order details feature coming soon! (ID: ' + id + ')');
+        }
+    </script>
+</body>
+
+</html>

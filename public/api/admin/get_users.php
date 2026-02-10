@@ -1,8 +1,8 @@
 <?php
 require_once '../config.php';
 
-// Check if user is admin
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+// Check if user is admin1
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin1') {
     http_response_code(403);
     echo json_encode(['message' => 'Access denied']);
     exit;
@@ -10,33 +10,31 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 $conn = getDBConnection();
 
-// Get all users with their details
-$query = "SELECT 
-    id, 
-    username, 
-    email, 
-    role, 
-    status, 
-    created_at,
-    (SELECT role FROM users WHERE id = ?) as current_user_role
-    FROM users 
-    ORDER BY created_at DESC";
+try {
+    // Get all users with their details
+    $query = "SELECT 
+        id, 
+        username, 
+        email, 
+        role, 
+        status, 
+        created_at
+        FROM users 
+        ORDER BY created_at DESC";
 
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $_SESSION['user_id']);
-$stmt->execute();
-$result = $stmt->get_result();
+    $stmt = $conn->prepare($query);
+    $stmt->execute();
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$users = [];
-while ($row = $result->fetch_assoc()) {
-    // Check if user is admin (simplified - you might have a separate is_admin field)
-    $row['is_admin'] = ($row['role'] === 'admin' && $row['id'] == 1); // Assuming user ID 1 is super admin
+    // Add is_admin flag
+    foreach ($users as &$user) {
+        $user['is_admin'] = ($user['role'] === 'admin1');
+    }
 
-    $users[] = $row;
+    echo json_encode($users);
 }
-
-echo json_encode($users);
-
-$stmt->close();
-$conn->close();
+catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['message' => 'Error fetching users']);
+}
 ?>

@@ -1,8 +1,8 @@
 <?php
 require_once '../config.php';
 
-// Check if user is admin
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+// Check if user is admin1
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin1') {
     http_response_code(403);
     echo json_encode(['message' => 'Access denied']);
     exit;
@@ -25,60 +25,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $conn = getDBConnection();
 
-    // Get current stock
-    $checkStmt = $conn->prepare("SELECT stock_quantity FROM products WHERE id = ?");
-    $checkStmt->bind_param("i", $product_id);
-    $checkStmt->execute();
-    $result = $checkStmt->get_result();
+    try {
+        // Get current stock
+        $checkStmt = $conn->prepare("SELECT stock_quantity FROM products WHERE id = :id");
+        $checkStmt->execute([':id' => $product_id]);
 
-    if ($result->num_rows === 0) {
-        http_response_code(404);
-        echo json_encode(['message' => 'Product not found']);
-        exit;
-    }
-
-    $product = $result->fetch_assoc();
-    $previous_quantity = $product['stock_quantity'];
-    $new_quantity = $previous_quantity + $quantity;
-
-    $checkStmt->close();
-
-    // Update product stock
-    $updateStmt = $conn->prepare("UPDATE products SET stock_quantity = ? WHERE id = ?");
-    $updateStmt->bind_param("ii", $new_quantity, $product_id);
-
-    if ($updateStmt->execute()) {
-        // Log inventory change
-        $logStmt = $conn->prepare("INSERT INTO inventory_logs (product_id, user_id, type, quantity, previous_quantity, new_quantity, notes) VALUES (?, ?, 'add', ?, ?, ?, ?)");
-        $logStmt->bind_param("iiiiis", $product_id, $_SESSION['user_id'], $quantity, $previous_quantity, $new_quantity, $notes);
-        $logStmt->execute();
-
-        // Create notification for seller
-        $sellerStmt = $conn->prepare("SELECT seller_id FROM products WHERE id = ?");
-        $sellerStmt->bind_param("i", $product_id);
-        $sellerStmt->execute();
-        $sellerResult = $sellerStmt->get_result();
-
-        if ($sellerResult->num_rows > 0) {
-            $seller = $sellerResult->fetch_assoc();
-            $notifStmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, type) VALUES (?, 'Stock Added', CONCAT('Admin added ', ?, ' units to your product'), 'system')");
-            $notifStmt->bind_param("ii", $seller['seller_id'], $quantity);
-            $notifStmt->execute();
-            $notifStmt->close();
+        if ($checkStmt->rowCount() === 0) {
+            http_response_code(404);
+            echo json_encode(['message' => 'Product not found']);
+            exit;
         }
 
-        $sellerStmt->close();
-        $logStmt->close();
+        $product = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        $previous_quantity = $product['stock_quantity'];
+        $new_quantity = $previous_quantity + $quantity;
+
+        // Update product stock
+        $updateStmt = $conn->prepare("UPDATE products SET stock_quantity = :quantity WHERE id = :id");
+        $updateStmt->execute([':quantity' => $new_quantity, ':id' => $product_id]);
+
+        // Log inventory change
+        try {
+            $logStmt = $conn->prepare("INSERT INTO inventory_logs (product_id, user_id, type, quantity, previous_quantity, new_quantity, notes) VALUES (:product_id, :user_id, 'add', :quantity, :prev_qty, :new_qty, :notes)");
+            $logStmt->execute([
+                ':product_id' => $product_id,
+                ':user_id' => $_SESSION['user_id'],
+                ':quantity' => $quantity,
+                ':prev_qty' => $previous_quantity,
+                ':new_qty' => $new_quantity,
+                ':notes' => $notes
+            ]);
+        }
+        catch (PDOException $e) {
+        }
+
+        // Create notification for seller
+        $sellerStmt = $conn->prepare("SELECT seller_id FROM products WHERE id = :id");
+        $sellerStmt->execute([':id' => $product_id]);
+        $seller = $sellerStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($seller) {
+            try {
+                $notifStmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, type) VALUES (:user_id, 'Stock Added', :message, 'system')");
+                $message = "Admin added $quantity units to your product";
+                $notifStmt->execute([':user_id' => $seller['seller_id'], ':message' => $message]);
+            }
+            catch (PDOException $e) {
+            }
+        }
 
         echo json_encode(['message' => 'Stock added successfully']);
-    }
-    else {
-        http_response_code(500);
-        echo json_encode(['message' => 'Failed to add stock']);
-    }
 
-    $updateStmt->close();
-    $conn->close();
+    }
+    catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['message' => 'Error adding stock: ' . $e->getMessage()]);
+    }
 }
 else {
     http_response_code(405);

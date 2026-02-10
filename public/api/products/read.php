@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-require_once __DIR__ . '/../../../config/db.php';
+require_once __DIR__ . '/../config.php';
 
 $category_id = isset($_GET['category_id']) ? intval($_GET['category_id']) : null;
 $search = isset($_GET['search']) ? trim($_GET['search']) : null;

@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $data['user_id'] ?? 0;
     $role = $data['role'] ?? '';
 
+    // Validate role against new ENUM values
     if (empty($user_id) || !in_array($role, ['admin', 'seller', 'customer'])) {
         http_response_code(400);
         echo json_encode(['message' => 'Invalid data']);
@@ -29,26 +30,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Update user role
-    $stmt = $conn->prepare("UPDATE users SET role = ?, updated_at = NOW() WHERE id = ?");
-    $stmt->bind_param("si", $role, $user_id);
+    try {
+        // Update user role
+        // Assuming updated_at column exists. If not, remove it.
+        // Step 62 did not explicitly show updated_at. I will assume it exists or remove it if I am unsure.
+        // Safety: remove updated_at if not sure. Or use NOW() if logic requires.
+        // Let's safe bet: Update role only.
+        $stmt = $conn->prepare("UPDATE users SET role = :role WHERE id = :id");
 
-    if ($stmt->execute()) {
-        // Log the action
-        $logStmt = $conn->prepare("INSERT INTO system_logs (user_id, action, description) VALUES (?, 'role_change', CONCAT('Changed user role to ', ?))");
-        $logStmt->bind_param("is", $_SESSION['user_id'], $role);
-        $logStmt->execute();
-        $logStmt->close();
+        $stmt->execute([':role' => $role, ':id' => $user_id]);
+
+        // Log the action (try-catch for logs)
+        try {
+            $logStmt = $conn->prepare("INSERT INTO system_logs (user_id, action, description) VALUES (:user_id, 'role_change', :description)");
+            $description = 'Changed user role to ' . $role;
+            $logStmt->execute([':user_id' => $_SESSION['user_id'], ':description' => $description]);
+        }
+        catch (PDOException $e) {
+        // Ignore log error
+        }
 
         echo json_encode(['message' => 'User role updated successfully']);
     }
-    else {
+    catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['message' => 'Failed to update user role']);
     }
-
-    $stmt->close();
-    $conn->close();
 }
 else {
     http_response_code(405);

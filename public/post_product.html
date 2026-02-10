@@ -711,11 +711,15 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
             submitBtn.disabled = true;
 
+            // Get form data
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
 
-            // Add seller ID (you might get this from session)
-            data.seller_id = 1; // This should come from your authentication system
+            // Add image URL from hidden input if using the drag-drop handler
+            // Note: The file input logic in the HTML seems to handle preview but not proper upload via FormData for files.
+            // However, the backend create.php expects JSON payload with image_url string (base64 or URL).
+            // The handleImageUpload function sets the base64 to 'image_url' hidden field.
+            // So data['image_url'] should be populated.
 
             try {
                 const res = await fetch('api/products/create.php', {
@@ -725,10 +729,9 @@
                 });
 
                 const result = await res.json();
-                const msgDiv = document.getElementById('message');
 
                 if (res.ok) {
-                    showMessage(result.message || 'Product posted successfully!', 'success');
+                    showMessage('Product posted successfully!', 'success');
                     setTimeout(() => {
                         window.location.href = 'seller_dashboard.html';
                     }, 2000);

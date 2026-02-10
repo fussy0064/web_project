@@ -83,16 +83,16 @@
                     const date = new Date(order.created_at).toLocaleDateString();
                     let itemsHtml = '';
                     order.items.forEach(item => {
-                        itemsHtml += `<li><span>${item.name} (x${item.quantity})</span> <span>$${item.price_at_purchase}</span></li>`;
+                        itemsHtml += `<li><span>${item.name} (x${item.quantity})</span> <span>TShs ${parseFloat(item.price).toLocaleString()}</span></li>`;
                     });
 
                     list.innerHTML += `
                         <div class="order-card">
                             <div class="order-header">
-                                <strong>Order #${order.id}</strong>
+                                <strong>Order #${order.order_number || order.id}</strong>
                                 <span>Date: ${date}</span>
                                 <span class="badge-${order.status}">${order.status}</span>
-                                <strong>Total: $${order.total_amount}</strong>
+                                <strong>Total: TShs ${parseFloat(order.total).toLocaleString()}</strong>
                             </div>
                             <ul class="order-items">
                                 ${itemsHtml}
