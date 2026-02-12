@@ -1,10 +1,16 @@
 <?php
 // config.php
+// Suppress error display to prevent JSON corruption
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'electronics_db');
-define('DB_USER', 'fussy');
-define('DB_PASS', 'fussy');
-define('BASE_URL', 'http://localhost/electroshop');
+define('DB_USER', 'root'); // Standard XAMPP user
+define('DB_PASS', ''); // Standard XAMPP password (usually empty)
+// define('DB_USER', 'fussy');  // Old user
+// define('DB_PASS', 'fussy');  // Old password
+define('BASE_URL', 'http://localhost/Electronics_Ordering_System/web_project/public');
 
 function getDBConnection()
 {
@@ -21,7 +27,9 @@ function getDBConnection()
 }
 
 // Enable CORS
-header("Access-Control-Allow-Origin: " . BASE_URL);
+// Allow requests from the current origin (likely localhost)
+$origin = $_SERVER['HTTP_ORIGIN'] ?? 'http://localhost';
+header("Access-Control-Allow-Origin: " . $origin);
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
@@ -81,6 +89,10 @@ function sendResponse($data, $statusCode = 200)
     exit;
 }
 
+// Suppress errors to prevent JSON corruption
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 // Helper function to send error response
 function sendError($message, $statusCode = 400)
 {
@@ -88,4 +100,3 @@ function sendError($message, $statusCode = 400)
     echo json_encode(['message' => $message]);
     exit;
 }
-?>

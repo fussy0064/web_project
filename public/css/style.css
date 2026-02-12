@@ -1,17 +1,17 @@
 /* Update CSS Variables for Modern Look */
 :root {
     --primary-color: #2e437d;
-    /* Green Theme */
-    --secondary-color: #14e01e;
-    --accent-color: #FFC107;
-    --light-color: #f1f8e9;
-    --dark-color: #161a17;
+    --secondary-color: #3b5998;
+    --accent-color: #5a7fc0;
+    --light-color: #f5f7fa;
+    --dark-color: #1a1a1a;
+    --text-color: #2c3e50;
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
     /* Modern additions */
-    --gradient-primary: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
-    --gradient-secondary: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
-    --gradient-accent: linear-gradient(135deg, #FFC107 0%, #FFB300 100%);
+    --gradient-primary: linear-gradient(135deg, #2e437d 0%, #3b5998 100%);
+    --gradient-secondary: linear-gradient(135deg, #5a7fc0 0%, #6c8cd5 100%);
+    --gradient-accent: linear-gradient(135deg, #5a7fc0 0%, #4a6fa5 100%);
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -31,8 +31,8 @@
 body {
     font-family: var(--font-family);
     line-height: 1.6;
-    color: #333;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: var(--text-color);
+    background: #f5f7fa;
     min-height: 100vh;
 }
 
@@ -69,7 +69,7 @@ nav {
 }
 
 nav h1 a {
-    color: #fff;
+    color: green;
     text-decoration: none;
     font-size: 1.8rem;
     font-weight: 700;
@@ -92,7 +92,7 @@ nav ul {
 }
 
 nav ul li a {
-    color: #fff;
+    color: green;
     text-decoration: none;
     font-weight: 500;
     padding: 0.5rem 1rem;
@@ -102,24 +102,8 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
-}
-
-nav ul li a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background: var(--accent-color);
-    transition: var(--transition);
-    transform: translateX(-50%);
-}
-
-nav ul li a:hover::after {
-    width: 80%;
 }
 
 /* Modern Card Styles */
@@ -146,7 +130,7 @@ nav ul li a:hover::after {
 
 .card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(46, 125, 50, 0.15);
+    box-shadow: 0 12px 40px rgba(46, 67, 125, 0.15);
 }
 
 .card h2 {
@@ -205,7 +189,7 @@ form {
     outline: none;
     border-color: var(--primary-color);
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    box-shadow: 0 0 0 3px rgba(46, 67, 125, 0.1);
 }
 
 .form-group input::placeholder {
@@ -267,9 +251,9 @@ form {
 }
 
 .btn:hover {
-    background: linear-gradient(135deg, #1b5e20 0%, #2e537d 100%);
+    background: linear-gradient(135deg, #1e2f5f 0%, #2a4278 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
+    box-shadow: 0 6px 20px rgba(46, 67, 125, 0.3);
 }
 
 .btn:hover::before {
@@ -311,27 +295,12 @@ a:not(.btn) {
     color: var(--primary-color);
     text-decoration: none;
     font-weight: 600;
-    position: relative;
-    transition: var(--transition);
-}
-
-a:not(.btn)::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--gradient-accent);
     transition: var(--transition);
 }
 
 a:not(.btn):hover {
-    color: var(--dark-color);
-}
-
-a:not(.btn):hover::after {
-    width: 100%;
+    color: #1e2f5f;
+    text-decoration: underline;
 }
 
 /* Auth Pages Specific Styles */

@@ -43,7 +43,7 @@
         }
 
         .cart-header h2 {
-            color: var(--dark-color);
+            color: green;
             font-size: 1.8rem;
             display: flex;
             align-items: center;
@@ -551,7 +551,6 @@
                     <li id="user-links" style="display:none;">
                         <div class="user-dropdown">
                             <button class="user-menu">
-                                <span id="username">User</span>
                                 <i class="fas fa-chevron-down"></i>
                             </button>
                             <div class="dropdown-content">
@@ -723,7 +722,6 @@
             if (user) {
                 authLinks.style.display = 'none';
                 userLinks.style.display = 'flex';
-                document.getElementById('username').textContent = user.username;
             } else {
                 authLinks.style.display = 'flex';
                 userLinks.style.display = 'none';

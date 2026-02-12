@@ -1,8 +1,8 @@
 RewriteEngine On
-RewriteBase /electroshop/
+RewriteBase /Electronics_Ordering_System/web_project/public/
 
-# API routing
-RewriteRule ^api/(.*)$ api/index.php?route=$1 [QSA,L]
+# API routing - DISABLED (causing 404 errors)
+# RewriteRule ^api/(.*)$ api/index.php?route=$1 [QSA,L]
 
 # Security - protect config file
 <Files "config.php">

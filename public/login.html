@@ -50,31 +50,54 @@
             const data = Object.fromEntries(formData.entries());
             const messageDiv = document.getElementById('message');
 
+            // Debug: Log what we're sending
+            console.log('🔍 Login attempt with:', { email: data.email, password: '***' });
+
+            messageDiv.style.color = 'blue';
+            messageDiv.textContent = 'Logging in...';
+
             try {
+                console.log('📤 Sending request to api/auth/login.php');
                 const response = await fetch('api/auth/login.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
+                console.log('📥 Response status:', response.status);
+
                 const result = await response.json();
+                console.log('📥 Response data:', result);
 
                 if (response.ok) {
+                    console.log('✅ Login successful!');
                     messageDiv.style.color = 'green';
                     messageDiv.textContent = 'Login successful! Redirecting...';
                     // Store user data in localStorage for convenience (Session is handled by PHP)
                     localStorage.setItem('user', JSON.stringify(result.user));
+                    console.log('💾 User data stored in localStorage');
                     setTimeout(() => window.location.href = 'index.html', 1000);
                 } else {
+                    console.error('❌ Login failed:', result.message);
                     messageDiv.style.color = 'red';
                     messageDiv.textContent = result.message || 'Login failed';
+
+                    // Show helpful message
+                    if (result.message && result.message.includes('Invalid credentials')) {
+                        messageDiv.innerHTML = result.message + '<br><small>Try: testlogin@example.com / test123<br>Or <a href="create_test_user.php">create test user</a></small>';
+                    }
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ Network/Parse Error:', error);
                 messageDiv.style.color = 'red';
-                messageDiv.textContent = 'An error occurred. Please try again.';
+                messageDiv.textContent = 'Network error. Check console (F12) for details.';
+                messageDiv.innerHTML += '<br><small>Error: ' + error.message + '</small>';
             }
         });
+
+        // Add helper text
+        console.log('💡 Login page loaded. Open browser console (F12) to see detailed login debug info.');
+        console.log('💡 Test credentials: testlogin@example.com / test123');
     </script>
 </body>
 

@@ -498,7 +498,6 @@
                     <li id="user-links" style="display:none;">
                         <div class="user-dropdown">
                             <button class="user-menu">
-                                <span id="username">User</span>
                                 <i class="fas fa-chevron-down"></i>
                             </button>
                             <div class="dropdown-content">
@@ -713,7 +712,6 @@
                 userProfile.style.display = 'block';
 
                 // Update user info
-                document.getElementById('username').textContent = user.username;
                 document.getElementById('user-fullname').textContent = `Welcome, ${user.username}!`;
                 document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
 
