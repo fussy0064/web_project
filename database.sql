@@ -55,7 +55,7 @@ CREATE TABLE orders (
     phone VARCHAR(20),
     city VARCHAR(100),
     payment_method VARCHAR(50),
-    status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+    status ENUM('pending', 'processing', 'ready', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

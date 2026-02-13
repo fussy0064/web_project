@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Electronics Ordering System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <h1>
+                    <a href="index.html" class="logo">
+                        <i class="fas fa-bolt"></i>
+                        <span>ElectroShop</span>
+                    </a>
+                </h1>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-arrow-left"></i> Back to Shop</a></li>
+                    <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart <span id="cart-count"
+                                class="cart-count">0</span></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="padding-top: 40px; padding-bottom: 40px; min-height: 60vh;">
+        <div id="loading" class="loading" style="text-align: center; padding: 50px;">
+            <div class="spinner" style="
+                width: 50px;
+                height: 50px;
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid var(--primary-color);
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;"></div>
+            <p>Loading product details...</p>
+        </div>
+
+        <div id="product-details" class="card" style="display: none; max-width: 1000px; margin: 0 auto;">
+            <!-- Content injected by JS -->
+        </div>
+
+        <div id="error-msg" style="display: none; text-align: center; padding: 50px;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 20px;"></i>
+            <h3>Product not found</h3>
+            <p>The product you are looking for does not exist or has been removed.</p>
+            <a href="index.html" class="btn" style="margin-top: 20px;">Browse Products</a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p class="copyright">&copy; 2026 Electronics Ordering System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            updateCartCount();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+
+            if (!productId) {
+                showError();
+                return;
+            }
+
+            try {
+                const res = await fetch(`api/products/get_product.php?id=${productId}`);
+                if (!res.ok) throw new Error('Product not found');
+
+                const product = await res.json();
+                if (!product || product.error) throw new Error('Product not found');
+
+                renderProduct(product);
+            } catch (error) {
+                console.error(error);
+                showError();
+            }
+        });
+
+        function renderProduct(product) {
+            const container = document.getElementById('product-details');
+            document.getElementById('loading').style.display = 'none';
+            container.style.display = 'grid'; // Change to grid/flex as needed via style injection or class
+            container.style.gridTemplateColumns = '1fr 1fr';
+            container.style.gap = '40px';
+
+            // Set page title
+            document.title = `${product.name} - Electronics Ordering System`;
+
+            container.innerHTML = `
+                <div class="product-image-section">
+                    <img src="${product.image_url || 'https://via.placeholder.com/600x600?text=No+Image'}" 
+                         alt="${product.name}" 
+                         style="width: 100%; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); object-fit: cover; max-height: 500px;">
+                </div>
+                
+                <div class="product-info-section">
+                    <div style="color: var(--primary-color); font-weight: 600; margin-bottom: 10px; font-size: 1.1rem;">
+                        ${getCategoryName(product.category_id)}
+                    </div>
+                    
+                    <h1 style="font-size: 2.5rem; margin-bottom: 15px; line-height: 1.2; color: #333;">${product.name}</h1>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+                        <span style="font-size: 2rem; font-weight: 800; color: #e74c3c;">
+                            TShs ${parseFloat(product.price).toLocaleString()}
+                        </span>
+                        <span class="stock-status ${product.stock_quantity > 0 ? 'stock-in' : 'stock-out'}" 
+                              style="padding: 5px 12px; border-radius: 20px; background: ${product.stock_quantity > 0 ? '#d4edda' : '#f8d7da'}; color: ${product.stock_quantity > 0 ? '#155724' : '#721c24'}; font-weight: 600;">
+                            <i class="fas ${product.stock_quantity > 0 ? 'fa-check' : 'fa-times'}"></i>
+                            ${product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                    </div>
+
+                    <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #eee;">
+                        <h4 style="margin-bottom: 15px; color: #555;">Product Details</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <div class="spec-item">
+                                <strong>Brand:</strong> ${product.brand || 'N/A'}
+                            </div>
+                            <div class="spec-item">
+                                <strong>Model:</strong> ${product.model || 'N/A'}
+                            </div>
+                            <div class="spec-item">
+                                <strong>Condition:</strong> ${product.condition || 'New'}
+                            </div>
+                            <div class="spec-item">
+                                <strong>Location:</strong> ${product.city || 'Available Online'}
+                            </div>
+                            <div class="spec-item" style="grid-column: 1 / -1;">
+                                <strong>Seller:</strong> ${product.seller_name || 'Verified Seller'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="margin-bottom: 10px; font-size: 1.3rem;">Description</h3>
+                        <p style="color: #666; line-height: 1.8;">${product.description}</p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button onclick="addToCartAndNotify(${product.id}, ${product.price}, '${product.name.replace(/'/g, "\\'")}', ${product.stock_quantity}, ${product.seller_id})" 
+                                class="btn btn-full" 
+                                style="font-size: 1.2rem; padding: 15px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;"
+                                ${product.stock_quantity <= 0 ? 'disabled' : ''}>
+                            <i class="fas fa-cart-plus"></i> ${product.stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Responsive fix
+            if (window.innerWidth <= 768) {
+                container.style.gridTemplateColumns = '1fr';
+            }
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-msg').style.display = 'block';
+        }
+
+        function getCategoryName(categoryId) {
+            const categories = {
+                1: 'Laptops & Computers',
+                2: 'Smartphones & Tablets',
+                3: 'Audio & Headphones',
+                4: 'Wearables & Smartwatches',
+                6: 'Gaming Consoles',
+                7: 'Accessories',
+                8: 'Home Electronics',
+                9: 'TVs & Monitors',
+                10: 'Other Electronics'
+            };
+            return categories[categoryId] || 'Electronics';
+        }
+
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            const cartCountEl = document.getElementById('cart-count');
+            if (cartCountEl) cartCountEl.textContent = count;
+        }
+
+        async function addToCartAndNotify(productId, price, name, stock, sellerId) {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+            if (!user) {
+                alert('Please login to add items to cart');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (stock <= 0) {
+                alert('This product is out of stock');
+                return;
+            }
+
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                if (existingItem.quantity >= stock) {
+                    alert(`Only ${stock} items available in stock`);
+                    return;
+                }
+                existingItem.quantity++;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: name,
+                    price: price,
+                    quantity: 1,
+                    image: '', // Image URL needs to be passed or fetched in cart, but for now empty is fine as cart fetches fresh data
+                    seller_id: sellerId
+                });
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            alert('Product added to cart successfully!');
+        }
+    </script>
+</body>
+
+</html>

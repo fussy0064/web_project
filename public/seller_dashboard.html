@@ -472,7 +472,7 @@
 
 <body>
     <header>
-        <div class="container">
+        <div class="header-container">
             <nav>
                 <h1>
                     <a href="seller_dashboard.html" class="logo">
@@ -480,10 +480,11 @@
                         <span>ElectroShop Seller</span>
                     </a>
                 </h1>
-                <ul>
-                    <li><a href="index.html"><i class="fas fa-store"></i> Shop Home</a></li>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link"><i class="fas fa-store"></i> Shop Home</a></li>
+
                     <li class="notification-dropdown">
-                        <a href="#" class="notification-bell" id="notificationBell">
+                        <a href="#" class="nav-link notification-bell" id="notificationBell">
                             <i class="fas fa-bell"></i>
                             <span class="notification-count" id="notificationCount">0</span>
                         </a>
@@ -494,13 +495,24 @@
                             </div>
                             <div class="notification-list" id="notificationList">
                                 <!-- Notifications will be loaded here -->
-                                <div class="notification-empty">
-                                    <p>No new notifications</p>
-                                </div>
                             </div>
                         </div>
                     </li>
-                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+
+                    <li id="user-links">
+                        <div class="user-dropdown">
+                            <button class="user-menu-btn">
+                                <i class="fas fa-store"></i> <span id="seller-username-display">Seller</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="profile.html" class="dropdown-item"><i class="fas fa-user-cog"></i> Profile</a>
+                                <a href="settings.html" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
+                                <a href="#" id="logout-btn" class="dropdown-item logout"><i
+                                        class="fas fa-sign-out-alt"></i> Logout</a>
+                            </div>
+                        </div>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -818,6 +830,32 @@
         }
     </style>
 
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><i class="fas fa-bolt" style="color: #ffd700;"></i> ElectroShop Seller</h4>
+                    <p>Grow your business with ElectroShop. Reach millions of customers across Tanzania.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="seller_dashboard.html"><i class="fas fa-chevron-right"></i> Dashboard</a>
+                    <a href="post_product.html"><i class="fas fa-chevron-right"></i> Sell Product</a>
+                    <a href="manage_orders.html"><i class="fas fa-chevron-right"></i> Orders</a>
+                    <a href="seller_help.html"><i class="fas fa-chevron-right"></i> Seller Help</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Seller Support</h4>
+                    <p><i class="fas fa-envelope"></i> sellers@electroshop.com</p>
+                    <p><i class="fas fa-phone"></i> +255 759 000 000</p>
+                    <p><i class="fas fa-comments"></i> Live Chat (9am - 6pm)</p>
+                </div>
+            </div>
+            <p class="copyright">&copy; 2026 ElectroShop. All rights reserved. | Seller Center</p>
+        </div>
+    </footer>
+
     <script src="js/app.js"></script>
     <script>
         let currentSeller = null;
@@ -1100,13 +1138,14 @@
                                     <td>${order.item_count} items</td>
                                     <td>TShs ${parseFloat(order.total).toLocaleString()}</td>
                                     <td>
-                                        <select class="status-select" data-order-id="${order.id}" onchange="updateOrderStatus(${order.id}, this.value)">
-                                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                            <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-                                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                                        </select>
+                                            <select class="status-select" data-order-id="${order.id}" onchange="updateOrderStatus(${order.id}, this.value)">
+                                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                                                <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Ready</option>
+                                                <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                            </select>
                                     </td>
                                     <td>${new Date(order.created_at).toLocaleDateString()}</td>
                                     <td>

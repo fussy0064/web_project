@@ -1,6 +1,11 @@
 <?php
 require_once '../config.php';
 
+// Prevent caching
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
 // Check if user is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     http_response_code(403);
@@ -21,18 +26,31 @@ try {
     $stmt->execute();
     $productResult = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Get total orders
-    $stmt = $conn->prepare("SELECT COUNT(*) as total_orders, COALESCE(SUM(total), 0) as total_revenue FROM orders");
+    // Get total orders (excluding cancelled)
+    $stmt = $conn->prepare("SELECT COUNT(*) as total_orders FROM orders WHERE status != 'cancelled'");
     $stmt->execute();
-    $orderResult = $stmt->fetch(PDO::FETCH_ASSOC);
+    $orderCountResult = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Get total revenue (only delivered)
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(total), 0) as total_revenue FROM orders WHERE status = 'delivered'");
+    $stmt->execute();
+    $revenueResult = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Combine results for response compatibility
+    $orderResult = [
+        'total_orders' => $orderCountResult['total_orders'],
+        'total_revenue' => $revenueResult['total_revenue']
+    ];
+
+
 
     // Get active sellers
     $stmt = $conn->prepare("SELECT COUNT(*) as active_sellers FROM users WHERE role = 'seller' AND status = 'active'");
     $stmt->execute();
     $sellerResult = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Get today's revenue
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(total), 0) as daily_revenue FROM orders WHERE DATE(created_at) = CURDATE()");
+    // Get today's revenue (only delivered)
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(total), 0) as daily_revenue FROM orders WHERE DATE(created_at) = CURDATE() AND status = 'delivered'");
     $stmt->execute();
     $todayResult = $stmt->fetch(PDO::FETCH_ASSOC);
 

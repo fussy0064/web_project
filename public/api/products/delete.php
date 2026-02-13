@@ -1,7 +1,8 @@
 <?php
-header('Content-Type: application/json');
+// products/delete.php
 require_once __DIR__ . '/../config.php';
-session_start();
+
+// Session already started in config.php
 
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
@@ -9,7 +10,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
 
 if (!isset($data['id'])) {
     http_response_code(400);
@@ -18,9 +20,9 @@ if (!isset($data['id'])) {
 }
 
 try {
+    $conn = getDBConnection();
     $product_id = $data['id'];
 
-    // If user is seller, verify ownership
     if ($_SESSION['role'] === 'seller') {
         $check = $conn->prepare("SELECT id FROM products WHERE id = ? AND seller_id = ?");
         $check->execute([$product_id, $_SESSION['user_id']]);
@@ -36,12 +38,25 @@ try {
         exit;
     }
 
-    $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+    // Soft delete: set status to inactive to preserve order history
+    $stmt = $conn->prepare("UPDATE products SET status = 'inactive' WHERE id = ?");
     $stmt->execute([$product_id]);
-    echo json_encode(['message' => 'Product deleted']);
+
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(['message' => 'Product blocked/deactivated successfully (Soft Delete)']);
+    }
+    else {
+        http_response_code(404);
+        echo json_encode(['message' => 'Product not found or already inactive']);
+    }
+
 }
 catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['message' => 'Error deleting product']);
+    echo json_encode(['message' => 'Database error: ' . $e->getMessage()]);
+}
+catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['message' => 'Error: ' . $e->getMessage()]);
 }
 ?>

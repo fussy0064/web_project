@@ -2,7 +2,7 @@
 require_once '../config.php';
 
 // Check if user is admin1
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin1') {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     http_response_code(403);
     echo json_encode(['message' => 'Access denied']);
     exit;
@@ -20,6 +20,7 @@ try {
         status, 
         created_at
         FROM users 
+        WHERE status = 'active'
         ORDER BY created_at DESC";
 
     $stmt = $conn->prepare($query);
@@ -28,7 +29,7 @@ try {
 
     // Add is_admin flag
     foreach ($users as &$user) {
-        $user['is_admin'] = ($user['role'] === 'admin1');
+        $user['is_admin'] = ($user['role'] === 'admin');
     }
 
     echo json_encode($users);

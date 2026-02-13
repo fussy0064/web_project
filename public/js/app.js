@@ -17,15 +17,20 @@ async function checkAuth() {
             if (userLinks) userLinks.style.display = 'block';
 
             // Role based links
+            /* Admin button removed as per request
             if (data.user.role === 'admin') {
                 if (userLinks && !userLinks.querySelector('a[href="admin_dashboard.html"]')) {
                     const adminLink = document.createElement('a');
                     adminLink.href = 'admin_dashboard.html';
-                    adminLink.textContent = 'Admin Panel';
+                    adminLink.innerHTML = '<i class="fas fa-user-shield"></i> Admin Panel';
+                    adminLink.className = 'btn';
                     adminLink.style.marginRight = '10px';
+                    adminLink.style.padding = '8px 15px';
+                    adminLink.style.backgroundColor = '#dc3545';
                     userLinks.prepend(adminLink);
                 }
-            } else if (data.user.role === 'seller') {
+            }
+            */ if (data.user.role === 'seller') {
                 if (userLinks && !userLinks.querySelector('a[href="seller_dashboard.html"]')) {
                     const sellerLink = document.createElement('a');
                     sellerLink.href = 'seller_dashboard.html';

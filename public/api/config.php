@@ -4,13 +4,14 @@
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-define('DB_HOST', 'localhost');
+define('DB_HOST', '127.0.0.1');
 define('DB_NAME', 'electronics_db');
 define('DB_USER', 'root'); // Standard XAMPP user
 define('DB_PASS', ''); // Standard XAMPP password (usually empty)
 // define('DB_USER', 'fussy');  // Old user
 // define('DB_PASS', 'fussy');  // Old password
-define('BASE_URL', 'http://localhost/Electronics_Ordering_System/web_project/public');
+// define('BASE_URL', 'http://localhost/Electronics_Ordering_System/web_project/public');
+define('BASE_URL', '/Electronics_Ordering_System/web_project/public');
 
 function getDBConnection()
 {

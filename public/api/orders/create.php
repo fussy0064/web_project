@@ -11,8 +11,20 @@ if (!isset($_SESSION['user_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
+    // DEBUG LOGGING (Using /tmp to avoid permission issues)
+    file_put_contents('/tmp/order_debug.log', date('[Y-m-d H:i:s] ') . "Input: " . print_r($data, true) . "\n", FILE_APPEND);
+
     $user_id = $_SESSION['user_id'];
     $items = $data['items'] ?? [];
+
+    // Normalize items (handle product_id vs id)
+    foreach ($items as &$item) {
+        if (!isset($item['id']) && isset($item['product_id'])) {
+            $item['id'] = $item['product_id'];
+        }
+    }
+    unset($item); // Break reference
+
     $subtotal = $data['subtotal'] ?? 0;
     $shipping = $data['shipping'] ?? 0;
     $tax = $data['tax'] ?? 0;
@@ -23,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $payment_method = $data['payment_method'] ?? 'COD';
 
     if (empty($items) || empty($shipping_address)) {
+        file_put_contents(__DIR__ . '/order_debug.log', date('[Y-m-d H:i:s] ') . "Error: Invalid data\n", FILE_APPEND);
         http_response_code(400);
         echo json_encode(['message' => 'Invalid order data']);
         exit;

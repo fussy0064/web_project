@@ -28,6 +28,14 @@ try {
     $stmt = $conn->prepare($query);
     $stmt->execute($params);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Add base URL to images if local
+    foreach ($products as &$product) {
+        if (!empty($product['image_url']) && !filter_var($product['image_url'], FILTER_VALIDATE_URL)) {
+            $product['image_url'] = BASE_URL . '/' . $product['image_url'];
+        }
+    }
+
     echo json_encode($products);
 }
 catch (PDOException $e) {

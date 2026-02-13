@@ -2,7 +2,7 @@
 require_once '../config.php';
 
 // Check if user is admin1
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin1') {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     http_response_code(403);
     echo json_encode(['message' => 'Access denied']);
     exit;

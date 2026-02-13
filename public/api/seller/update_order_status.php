@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $order_id = $data['order_id'] ?? 0;
     $status = $data['status'] ?? '';
 
-    $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    $validStatuses = ['pending', 'processing', 'ready', 'shipped', 'delivered', 'cancelled'];
 
     if (empty($order_id) || !in_array($status, $validStatuses)) {
         http_response_code(400);

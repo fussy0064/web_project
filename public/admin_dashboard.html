@@ -696,7 +696,7 @@
 
 <body>
     <header>
-        <div class="container">
+        <div class="header-container">
             <nav>
                 <h1>
                     <a href="admin_dashboard.html" class="logo">
@@ -704,10 +704,11 @@
                         <span>ElectroShop Admin</span>
                     </a>
                 </h1>
-                <ul>
-                    <li><a href="index.html"><i class="fas fa-store"></i> Site Home</a></li>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link"><i class="fas fa-store"></i> Site Home</a></li>
+
                     <li class="notification-dropdown">
-                        <a href="#" class="notification-bell" id="notificationBell">
+                        <a href="#" class="nav-link notification-bell" id="notificationBell">
                             <i class="fas fa-bell"></i>
                             <span class="notification-count" id="notificationCount">0</span>
                         </a>
@@ -721,7 +722,21 @@
                             </div>
                         </div>
                     </li>
-                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+
+                    <li id="user-links">
+                        <div class="user-dropdown">
+                            <button class="user-menu-btn">
+                                <i class="fas fa-user-shield"></i> <span id="admin-username-display">Admin</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="profile.html" class="dropdown-item"><i class="fas fa-user-cog"></i>
+                                    Settings</a>
+                                <a href="#" id="logout-btn" class="dropdown-item logout"><i
+                                        class="fas fa-sign-out-alt"></i> Logout</a>
+                            </div>
+                        </div>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -1127,6 +1142,31 @@
         </div>
     </div>
 
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><i class="fas fa-shield-alt" style="color: #ffd700;"></i> ElectroShop Admin</h4>
+                    <p>Secure administrative panel for managing the ElectroShop marketplace.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html"><i class="fas fa-chevron-right"></i> Site Home</a>
+                    <a href="admin_dashboard.html"><i class="fas fa-chevron-right"></i> Dashboard</a>
+                    <a href="products.html"><i class="fas fa-chevron-right"></i> Products</a>
+                    <a href="users.html"><i class="fas fa-chevron-right"></i> Users</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Admin Support</h4>
+                    <p><i class="fas fa-envelope"></i> admin@electroshop.com</p>
+                    <p><i class="fas fa-lock"></i> Restricted Access</p>
+                    <p><i class="fas fa-server"></i> Server Status: Online</p>
+                </div>
+            </div>
+            <p class="copyright">&copy; 2026 ElectroShop. All rights reserved. | Admin Panel v2.0</p>
+        </div>
+    </footer>
+
     <script src="js/app.js"></script>
     <script>
         let currentAdmin = null;
@@ -1148,7 +1188,7 @@
                 const res = await fetch('api/auth/check_session.php');
                 const data = await res.json();
 
-                if (!data.authenticated || data.role !== 'admin1') {
+                if (!data.authenticated || data.role !== 'admin') {
                     window.location.href = 'index.html';
                     return;
                 }
@@ -1175,7 +1215,8 @@
 
             try {
                 // Load admin stats
-                const statsRes = await fetch('api/admin/dashboard_stats.php');
+                // Load admin stats
+                const statsRes = await fetch('api/admin/dashboard_stats.php?_t=' + new Date().getTime());
                 if (statsRes.status === 403) {
                     window.location.href = 'index.html';
                     return;
@@ -1200,6 +1241,25 @@
             } catch (error) {
                 console.error('Error loading admin dashboard:', error);
                 showAdminError();
+            }
+
+            // Start auto-refresh for stats
+            setInterval(refreshAdminStats, 30000); // Refresh every 30 seconds
+        }
+
+        async function refreshAdminStats() {
+            try {
+                const statsRes = await fetch('api/admin/dashboard_stats.php?_t=' + new Date().getTime());
+                if (statsRes.ok) {
+                    const data = await statsRes.json();
+                    updateAdminStats(data);
+                    // Also update order list if currently viewing orders
+                    if (document.getElementById('orders-section').style.display !== 'none') {
+                        loadOrdersSection();
+                    }
+                }
+            } catch (error) {
+                console.error('Error refreshing stats:', error);
             }
         }
 
@@ -1256,10 +1316,10 @@
                             <i class="fas fa-money-bill-wave"></i>
                         </div>
                     </div>
-                    <div class="admin-stat-value">TShs ${parseFloat(data.total_revenue || 0).toLocaleString()}</div>
+                    <div class="admin-stat-value">TShs ${parseFloat(data.total_revenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     <div class="admin-stat-trend trend-up">
                         <i class="fas fa-arrow-up"></i>
-                        <span>TShs ${parseFloat(data.daily_revenue || 0).toLocaleString()} today</span>
+                        <span>TShs ${parseFloat(data.daily_revenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} today</span>
                     </div>
                 </div>
                 
@@ -2011,6 +2071,7 @@
                                             <select onchange="updateOrderStatus(${order.id}, this.value)" class="status-select">
                                                 <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
                                                 <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                                                <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Ready</option>
                                                 <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
                                                 <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                                                 <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
