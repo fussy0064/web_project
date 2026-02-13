@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - ElectroHub</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .checkout-form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .checkout-summary-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .order-items {
+            margin-bottom: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .item-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            color: #666;
+        }
+
+        .summary-total {
+            border-top: 2px solid #eee;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .place-order-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: background 0.3s;
+        }
+
+        .place-order-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .place-order-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: #ef4444;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #fee2e2;
+            border-radius: 8px;
+            display: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">EH</div>
+                <span>ElectroHub</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="cart.html">Cart</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="checkout-container">
+        <!-- Shipping Form -->
+        <div class="checkout-form-section">
+            <h2>Shipping Details</h2>
+            <form id="checkoutForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" class="form-control" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" class="form-control" required placeholder="07XXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label>Shipping Address</label>
+                    <textarea id="address" class="form-control" rows="3" required
+                        placeholder="Enter delivery address"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="city" class="form-control" required placeholder="City">
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="paymentMethod" class="form-control">
+                        <option value="COD">Cash on Delivery</option>
+                        <option value="Mobile Money">Mobile Money (M-Pesa/Tigo Pesa)</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="checkout-summary-section">
+            <h2>Order Summary</h2>
+            <div class="order-items" id="orderItems">
+                <!-- populated by JS -->
+            </div>
+
+            <div class="summary-details">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="subtotal">TSh 0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span id="shipping">TSh 0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (18%)</span>
+                    <span id="tax">TSh 0</span>
+                </div>
+                <div class="summary-total summary-row">
+                    <span>Total</span>
+                    <span id="total">TSh 0</span>
+                </div>
+            </div>
+
+            <button class="place-order-btn" id="placeOrderBtn">Place Order</button>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check if pending order exists
+        let pendingOrder = null;
+        try {
+            pendingOrder = JSON.parse(localStorage.getItem('pendingOrder'));
+        } catch (e) {
+            console.error('Error parsing pending order', e);
+        }
+
+        if (!pendingOrder || !pendingOrder.items || pendingOrder.items.length === 0) {
+            alert('Your session has expired or cart is empty. Please return to cart.');
+            window.location.href = 'cart.html';
+        }
+
+        // Fill user details if logged in
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('fullName').value = user.username || '';
+                document.getElementById('address').value = user.address || '';
+                if (user.phone) document.getElementById('phone').value = user.phone;
+            }
+        } catch (e) { }
+
+        // Render Order Items
+        const orderItemsContainer = document.getElementById('orderItems');
+        pendingOrder.items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'order-item';
+            div.innerHTML = `
+                <div class="item-info">
+                    <div style="background:#eee; width:50px; height:50px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">📦</div>
+                    <div>
+                        <div style="font-weight:600">${item.name}</div>
+                        <div style="font-size:0.9rem; color:#666">Qty: ${item.quantity}</div>
+                    </div>
+                </div>
+                <div>TSh ${(item.price * item.quantity).toLocaleString()}</div>
+            `;
+            orderItemsContainer.appendChild(div);
+        });
+
+        // Update Totals
+        // Ensure values are numbers
+        const pSubtotal = parseFloat(pendingOrder.subtotal) || 0;
+        const pShipping = parseFloat(pendingOrder.deliveryFee) || 0;
+        const pTax = parseFloat(pendingOrder.tax) || 0;
+        const pTotal = parseFloat(pendingOrder.total) || 0;
+
+        document.getElementById('subtotal').textContent = `TSh ${pSubtotal.toLocaleString()}`;
+        document.getElementById('shipping').textContent = `TSh ${pShipping.toLocaleString()}`;
+        document.getElementById('tax').textContent = `TSh ${pTax.toLocaleString()}`;
+        document.getElementById('total').textContent = `TSh ${pTotal.toLocaleString()}`;
+
+        // Place Order
+        document.getElementById('placeOrderBtn').addEventListener('click', async function () {
+            const btn = this;
+            const errorDiv = document.getElementById('errorMessage');
+
+            // Validate form
+            const fullName = document.getElementById('fullName').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+
+            if (!fullName || !phone || !address || !city) {
+                errorDiv.textContent = 'Please fill in all details marked as required.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Processing Order...';
+            errorDiv.style.display = 'none';
+
+            // Ensure items have ID in correct format
+            const cleanItems = pendingOrder.items.map(i => ({
+                id: i.id,
+                quantity: parseInt(i.quantity) || 1,
+                price: parseFloat(i.price) || 0
+            }));
+
+            const payload = {
+                items: cleanItems,
+                subtotal: pSubtotal,
+                shipping: pShipping,
+                tax: pTax,
+                total: pTotal,
+                shipping_address: address,
+                phone: phone,
+                city: city,
+                payment_method: paymentMethod
+            };
+
+            console.log('Sending order payload:', payload);
+
+            try {
+                const response = await fetch('/Electronics_Ordering_System/web_project/public/api/orders/create.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                // Read text first to handle HTML errors gracefully
+                const text = await response.text();
+                let result;
+
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    // Response was not JSON (likely HTML error page)
+                    console.error('Non-JSON response:', text);
+                    throw new Error(`Server returned invalid response (Status ${response.status}). Please verify you are logged in.`);
+                }
+
+                if (response.ok) {
+                    // Clear cart and pending order
+                    localStorage.removeItem('cart');
+                    localStorage.removeItem('pendingOrder');
+                    alert('Order placed successfully! Order #' + (result.order ? result.order.order_number : ''));
+                    window.location.href = 'index.html';
+                } else {
+                    throw new Error(result.message || 'Failed to place order (Unknown error)');
+                }
+            } catch (err) {
+                console.error('Order error:', err);
+                errorDiv.textContent = `Error: ${err.message}`;
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Place Order';
+            }
+        });
+    </script>
+</body>
+
+</html>
