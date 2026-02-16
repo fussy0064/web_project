@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     // Base URL for API
-    const API_URL = '/Electronics_Ordering_System/web_project/public/api/auth';
+    const API_URL = 'api/auth';
 
     /* -------------------------------------------------------------------------- */
     /*                                LOGIN LOGIC                                 */

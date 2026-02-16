@@ -1,0 +1,18 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+vendor/
+
+# User uploads (if you don't want to commit them)
+# public/uploads/*
+# !public/uploads/.gitkeep
+
+# Environment variables
+.env

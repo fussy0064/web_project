@@ -95,7 +95,7 @@ function loadFeaturedItems() {
     const container = document.getElementById('featuredMenuItems');
     if (!container) return; // Only run on index.html
 
-    fetch('/Electronics_Ordering_System/web_project/public/api/products/')
+    fetch('api/products/')
         .then(res => res.json())
         .then(items => {
             if (items.length === 0) {
@@ -155,7 +155,7 @@ function addToCart(itemId) {
     }
 
     // Get the item details from the page or fetch from API
-    fetch('/Electronics_Ordering_System/web_project/public/api/products/')
+    fetch('api/products/')
         .then(res => res.json())
         .then(items => {
             const item = items.find(i => i.id == itemId);
