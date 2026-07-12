@@ -975,7 +975,7 @@
         // Load food items from API
         // Load food items from API
         function loadFoodItemsFromAPI() {
-            fetch('../../public/api/products/get_products.php')
+            fetch('/api/products')
                 .then(res => {
                     if (!res.ok) throw new Error('Network response was not ok');
                     return res.json();
@@ -1449,7 +1449,7 @@
             submitBtn.disabled = true;
 
             // Send order to backend API
-            fetch('/Electronics_Ordering_System/web_project/public/api/orders/create.php', {
+            fetch('/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

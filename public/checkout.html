@@ -304,7 +304,7 @@
             console.log('Sending order payload:', payload);
 
             try {
-                const response = await fetch('/Electronics_Ordering_System/web_project/public/api/orders/create.php', {
+                const response = await fetch('/api/orders', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

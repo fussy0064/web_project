@@ -125,6 +125,16 @@ CREATE TABLE inventory_logs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Contact messages table (used by the "Contact Us" form)
+CREATE TABLE contact_messages (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    subject VARCHAR(255),
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Insert default categories
 INSERT INTO categories (id, name) VALUES 
 (1, 'Laptops & Computers'),
@@ -139,6 +149,6 @@ INSERT INTO categories (id, name) VALUES
 (10, 'Other Electronics');
 
 -- Insert default admin user (password: admin123)
--- Password hash for 'admin123' using PASSWORD_DEFAULT
+-- Password hash for 'admin123' generated with bcryptjs (Node.js backend)
 INSERT INTO users (id, username, email, password_hash, role) VALUES 
-(1, 'admin', 'admin@electroshop.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+(1, 'admin', 'admin@electroshop.com', '$2b$10$SoMMweDPsezClndKXi0COOwfWLbqwaDF0VnxxRND8IVQr/h7ehF.G', 'admin');

@@ -95,7 +95,7 @@ function loadFeaturedItems() {
     const container = document.getElementById('featuredMenuItems');
     if (!container) return; // Only run on index.html
 
-    fetch('api/products/')
+    fetch('/api/products')
         .then(res => res.json())
         .then(items => {
             if (items.length === 0) {
@@ -110,15 +110,9 @@ function loadFeaturedItems() {
                 // But the backend saves 'uploads/filename'. 
                 // Let's assume we serve from root or use absolute path.
 
-                let imgPath = 'https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'; // Fallback
-                if (item.image_url) {
-                    if (item.image_url.startsWith('http') || item.image_url.startsWith('/')) {
-                        imgPath = item.image_url;
-                    } else {
-                        // Fallback for old data or relative paths not handled by API
-                        imgPath = '/electronics_ordering_system/frontend/' + item.image_url;
-                    }
-                }
+                // The API now always returns either a full URL or a root-relative
+                // "/uploads/..." path, so no extra prefixing is needed.
+                let imgPath = item.image_url || 'https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
 
                 const itemEl = document.createElement('div');
                 itemEl.className = 'menu-item';
@@ -155,7 +149,7 @@ function addToCart(itemId) {
     }
 
     // Get the item details from the page or fetch from API
-    fetch('api/products/')
+    fetch('/api/products')
         .then(res => res.json())
         .then(items => {
             const item = items.find(i => i.id == itemId);

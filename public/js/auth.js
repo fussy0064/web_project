@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     // Base URL for API
-    const API_URL = 'api/auth';
+    const API_URL = '/api/auth';
 
     /* -------------------------------------------------------------------------- */
     /*                                LOGIN LOGIC                                 */
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.innerHTML = '<span class="loading"></span> Logging in...';
             submitBtn.disabled = true;
 
-            fetch(`${API_URL}/login.php`, {
+            fetch(`${API_URL}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (userRole === 'admin') {
                             window.location.href = 'admin.html';
                         } else if (userRole === 'seller') {
-                            window.location.href = '/Electronics_Ordering_System/web_project/public/seller_dashboard.html';
+                            window.location.href = 'seller-dashboard.html';
                         } else {
                             window.location.href = 'index.html';
                         }
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 password: password
             };
 
-            fetch(`${API_URL}/register.php`, {
+            fetch(`${API_URL}/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

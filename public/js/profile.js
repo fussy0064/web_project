@@ -1,5 +1,5 @@
 // profile.js
-const API_BASE = '/Electronics_Ordering_System/web_project/public/api';
+const API_BASE = '/api';
 
 document.addEventListener('DOMContentLoaded', function () {
     // Check authentication
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Logout handler
     document.getElementById('logoutBtn').addEventListener('click', function () {
-        fetch(`${API_BASE}/auth/logout.php`)
+        fetch(`${API_BASE}/auth/logout`)
             .then(() => {
                 localStorage.removeItem('user');
                 localStorage.removeItem('cart');
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function loadProfile() {
-    fetch(`${API_BASE}/user/profile.php`)
+    fetch(`${API_BASE}/user/profile`)
         .then(res => {
             if (res.status === 401) {
                 window.location.href = 'login.html';
@@ -84,7 +84,7 @@ function loadProfile() {
 }
 
 function loadOrders() {
-    fetch(`${API_BASE}/orders/history.php`)
+    fetch(`${API_BASE}/orders`)
         .then(res => res.json())
         .then(orders => {
             const container = document.getElementById('ordersContainer');
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (password) updateData.password = password;
 
             // Send update request
-            fetch(`${API_BASE}/user/profile.php`, {
+            fetch(`${API_BASE}/user/profile`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updateData)
