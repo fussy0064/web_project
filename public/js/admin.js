@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initApp();
 });
 
-const API_BASE = '/api';
+const API_BASE = '/Electronics_Ordering_System/web_project/public/api';
 
 function initApp() {
     // Check Auth
@@ -39,7 +39,7 @@ window.showSection = function (sectionId) {
 /* -------------------------------------------------------------------------- */
 window.loadDashboard = function () {
     // Fetch dashboard stats from the dedicated API
-    fetch(`${API_BASE}/admin/dashboard_stats?_t=` + new Date().getTime())
+    fetch(`${API_BASE}/admin/dashboard_stats.php?_t=` + new Date().getTime())
         .then(res => {
             if (!res.ok) throw new Error('Failed to fetch stats');
             return res.json();
@@ -76,7 +76,7 @@ window.loadDashboard = function () {
 /*                                 ORDERS                                     */
 /* -------------------------------------------------------------------------- */
 window.loadOrders = function () {
-    fetch(`${API_BASE}/admin/orders`)
+    fetch(`${API_BASE}/admin/get_orders.php`)
         .then(res => {
             if (!res.ok) {
                 throw new Error(`HTTP error! status: ${res.status}`);
@@ -141,7 +141,7 @@ window.loadOrders = function () {
 };
 
 window.updateOrderStatus = function (orderId, newStatus) {
-    fetch(`${API_BASE}/seller/orders/status`, { // Using seller API as it handles status updates
+    fetch(`${API_BASE}/seller/update_order_status.php`, { // Using seller API as it handles status updates
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -168,8 +168,10 @@ window.viewOrderDetails = function (orderId) {
 
 window.deleteOrder = function (id) {
     if (confirm("Are you sure you want to delete this order? This action cannot be undone.")) {
-        fetch(`${API_BASE}/orders/${id}`, {
-            method: 'DELETE'
+        fetch(`${API_BASE}/orders/delete.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
         })
             .then(res => res.json())
             .then(data => {
@@ -189,7 +191,7 @@ window.deleteOrder = function (id) {
 /*                                  USERS                                     */
 /* -------------------------------------------------------------------------- */
 window.loadUsers = function () {
-    fetch(`${API_BASE}/admin/users`)
+    fetch(`${API_BASE}/admin/get_users.php`)
         .then(res => res.json())
         .then(users => {
             const tbody = document.getElementById('usersTableBody');
@@ -216,17 +218,19 @@ window.promoteUser = function (id, role) {
     if (role === 'customer') newRole = 'seller';
     else if (role === 'restaurant_owner') newRole = 'admin';
 
-    fetch(`${API_BASE}/admin/users/${id}/role`, {
+    fetch(`${API_BASE}/admin/promote_user.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: newRole })
+        body: JSON.stringify({ user_id: id, new_role: newRole })
     }).then(() => loadUsers());
 };
 
 window.deleteUser = function (id) {
     if (confirm("Delete user?")) {
-        fetch(`${API_BASE}/admin/users/${id}`, {
-            method: 'DELETE'
+        fetch(`${API_BASE}/admin/delete_user.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: id })
         }).then(() => loadUsers());
     }
 };
@@ -235,7 +239,7 @@ window.deleteUser = function (id) {
 /*                                 MENU                                       */
 /* -------------------------------------------------------------------------- */
 window.loadMenu = function () {
-    fetch(`${API_BASE}/products`)
+    fetch(`${API_BASE}/products/`)
         .then(res => res.json())
         .then(items => {
             const tbody = document.getElementById('menuTableBody');
@@ -261,8 +265,10 @@ window.loadMenu = function () {
 
 window.deleteMenuItem = function (id) {
     if (confirm("Delete item?")) {
-        fetch(`${API_BASE}/products/${id}`, {
-            method: 'DELETE'
+        fetch(`${API_BASE}/products/delete.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
         })
             .then(res => res.json())
             .then(data => {
@@ -322,10 +328,10 @@ if (menuForm) {
             formData.append('image', fileInput.files[0]);
         }
 
-        // fetch() (unlike native HTML forms) supports PUT with FormData just fine,
-        // so we use a proper RESTful create vs. update distinction here.
-        fetch(`${API_BASE}/products${id ? '/' + id : ''}`, {
-            method: id ? 'PUT' : 'POST',
+        // Use POST for both Create and Update (since HTML forms + files don't do PUT well)
+        // Our backend handles the logic based on presence of 'id' in POST data
+        fetch(`${API_BASE}/products/${id ? 'update.php' : 'create.php'}`, {
+            method: 'POST',
             body: formData
         })
             .then(res => {

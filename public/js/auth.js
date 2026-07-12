@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     // Base URL for API
-    const API_URL = '/api/auth';
+    const API_URL = 'api/auth';
 
     /* -------------------------------------------------------------------------- */
     /*                                LOGIN LOGIC                                 */
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.innerHTML = '<span class="loading"></span> Logging in...';
             submitBtn.disabled = true;
 
-            fetch(`${API_URL}/login`, {
+            fetch(`${API_URL}/login.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 password: password
             };
 
-            fetch(`${API_URL}/register`, {
+            fetch(`${API_URL}/register.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

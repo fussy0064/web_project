@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = '/Electronics_Ordering_System/web_project/public/api';
 
 document.addEventListener('DOMContentLoaded', function () {
     initApp();
@@ -15,7 +15,7 @@ function initApp() {
     showSection('dashboard');
 
     document.getElementById('logoutBtn').addEventListener('click', function () {
-        fetch(`${API_BASE}/auth/logout`).finally(() => {
+        fetch(`${API_BASE}/auth/logout.php`).finally(() => {
             localStorage.removeItem('user');
             window.location.href = 'login.html';
         });
@@ -37,7 +37,7 @@ window.showSection = function (sectionId) {
 
 /* Dashboard */
 window.loadDashboard = function () {
-    fetch(`${API_BASE}/seller/dashboard_stats`)
+    fetch(`${API_BASE}/seller/dashboard_stats.php`)
         .then(res => res.json())
         .then(data => {
             document.getElementById('stat-products').innerText = data.my_products || 0;
@@ -51,7 +51,7 @@ window.loadDashboard = function () {
 
 /* Products */
 window.loadProducts = function () {
-    fetch(`${API_BASE}/seller/products`)
+    fetch(`${API_BASE}/seller/products.php`)
         .then(res => res.json())
         .then(products => {
             const tbody = document.getElementById('productsTableBody');
@@ -108,6 +108,7 @@ function submitProductForm(e) {
 
     const id = document.getElementById('productId').value;
     const formData = new FormData();
+    if (id) formData.append('id', id);
     formData.append('name', document.getElementById('itemName').value);
     formData.append('description', document.getElementById('itemDesc').value);
     formData.append('brand', document.getElementById('itemBrand').value);
@@ -118,10 +119,12 @@ function submitProductForm(e) {
     const fileInput = document.getElementById('itemImage');
     if (fileInput.files[0]) formData.append('image', fileInput.files[0]);
 
-    const url = id ? `${API_BASE}/products/${id}` : `${API_BASE}/products`;
-    const method = id ? 'PUT' : 'POST';
-
-    fetch(url, { method, body: formData })
+    // The PHP backend uses POST for both create and update, keyed off
+    // whether an 'id' field is present in the submitted data.
+    fetch(`${API_BASE}/products/${id ? 'update.php' : 'create.php'}`, {
+        method: 'POST',
+        body: formData
+    })
         .then(res => res.json().then(data => ({ ok: res.ok, data })))
         .then(({ ok, data }) => {
             if (!ok) throw new Error(data.message || 'Request failed');
@@ -134,7 +137,11 @@ function submitProductForm(e) {
 
 window.deleteProduct = function (id) {
     if (!confirm('Delete this product?')) return;
-    fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' })
+    fetch(`${API_BASE}/products/delete.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id })
+    })
         .then(res => res.json())
         .then(data => {
             alert(data.message || 'Deleted');
@@ -145,7 +152,7 @@ window.deleteProduct = function (id) {
 
 /* Orders */
 window.loadOrders = function () {
-    fetch(`${API_BASE}/seller/orders`)
+    fetch(`${API_BASE}/seller/all_orders.php`)
         .then(res => res.json())
         .then(orders => {
             const tbody = document.getElementById('ordersTableBody');
@@ -180,7 +187,7 @@ window.loadOrders = function () {
 };
 
 window.updateOrderStatus = function (orderId, newStatus) {
-    fetch(`${API_BASE}/seller/orders/status`, {
+    fetch(`${API_BASE}/seller/update_order_status.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_id: orderId, status: newStatus })
@@ -192,7 +199,7 @@ window.updateOrderStatus = function (orderId, newStatus) {
 
 /* Notifications */
 window.loadNotifications = function () {
-    fetch(`${API_BASE}/seller/notifications`)
+    fetch(`${API_BASE}/seller/notifications.php`)
         .then(res => res.json())
         .then(data => {
             const list = document.getElementById('notificationsList');
@@ -213,6 +220,6 @@ window.loadNotifications = function () {
 };
 
 window.markAllRead = function () {
-    fetch(`${API_BASE}/seller/notifications/read-all`, { method: 'POST' })
+    fetch(`${API_BASE}/seller/mark_all_notifications_read.php`, { method: 'POST' })
         .then(() => loadNotifications());
 };
