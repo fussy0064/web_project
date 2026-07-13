@@ -64,9 +64,9 @@ else if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
 
     // Validate and prepare password update
     if ($password) {
-        if (strlen($password) < 6) {
+        if (strlen($password) < MIN_PASSWORD_LENGTH) {
             http_response_code(400);
-            echo json_encode(['message' => 'Password must be at least 6 characters']);
+            echo json_encode(['message' => 'Password must be at least ' . MIN_PASSWORD_LENGTH . ' characters']);
             exit;
         }
         $updates[] = "password_hash = :password";

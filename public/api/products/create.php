@@ -29,6 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $image_url = '';
         if (isset($_FILES['image'])) {
             if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                // App-level size cap, independent of php.ini's
+                // upload_max_filesize/post_max_size (which may be raised or
+                // lowered by hosting config without the app's knowledge).
+                if ($_FILES['image']['size'] > MAX_UPLOAD_BYTES) {
+                    http_response_code(400);
+                    echo json_encode(['message' => 'Image too large. Max size is ' . (MAX_UPLOAD_BYTES / 1024 / 1024) . 'MB']);
+                    exit;
+                }
+
                 // SECURITY FIX: previously any file extension was accepted and saved
                 // directly into a web-served directory (e.g. a file named
                 // "shell.php" would have been saved and could be executed by
@@ -60,6 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
+                if (!is_writable($upload_dir)) {
+                    error_log('Upload directory not writable: ' . realpath($upload_dir));
+                    http_response_code(500);
+                    echo json_encode(['message' => 'Server upload directory is not writable. Contact the administrator.']);
+                    exit;
+                }
+
                 $file_name = uniqid() . '.' . $file_extension;
                 $upload_path = $upload_dir . $file_name;
 
@@ -67,13 +83,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image_url = 'uploads/' . $file_name;
                 }
                 else {
+                    error_log('move_uploaded_file failed writing to: ' . $upload_path);
                     http_response_code(500);
-                    echo json_encode(['message' => 'Failed to save uploaded file']);
+                    echo json_encode(['message' => 'Failed to save uploaded file. Contact the administrator.']);
                     exit;
                 }
             }
+            elseif ($_FILES['image']['error'] === UPLOAD_ERR_INI_SIZE || $_FILES['image']['error'] === UPLOAD_ERR_FORM_SIZE) {
+                // PHP itself rejected the file for exceeding
+                // upload_max_filesize/post_max_size or the form's MAX_FILE_SIZE.
+                http_response_code(400);
+                echo json_encode(['message' => 'Image too large. Max size is ' . (MAX_UPLOAD_BYTES / 1024 / 1024) . 'MB']);
+                exit;
+            }
             elseif ($_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
-                // File was sent but error occurred (e.g. size too big)
+                // File was sent but some other error occurred
                 http_response_code(400);
                 echo json_encode(['message' => 'File upload error code: ' . $_FILES['image']['error']]);
                 exit;

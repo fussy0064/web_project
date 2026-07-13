@@ -32,6 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // BUG FIX: this endpoint previously had no password length check at all
+    // (register.php and user/profile.php both already enforced a minimum).
+    if (strlen($password) < MIN_PASSWORD_LENGTH) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Password must be at least ' . MIN_PASSWORD_LENGTH . ' characters']);
+        exit;
+    }
+
     $conn = getDBConnection();
 
     try {

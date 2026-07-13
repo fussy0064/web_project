@@ -24,6 +24,18 @@ function returnJSON($data, $code = 200)
     exit;
 }
 
+// Records a failed attempt so it counts toward the lockout window.
+function recordFailedAttempt($conn, $email, $ip)
+{
+    try {
+        $stmt = $conn->prepare("INSERT INTO login_attempts (email, ip_address) VALUES (:email, :ip)");
+        $stmt->execute([':email' => $email, ':ip' => $ip]);
+    }
+    catch (PDOException $e) {
+        // Never let logging failures block the response
+    }
+}
+
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         returnJSON(['message' => 'Method not allowed'], 405);
@@ -38,9 +50,34 @@ try {
 
     $email = $data['email'] ?? '';
     $password = $data['password'] ?? '';
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
     if (empty($email) || empty($password)) {
         returnJSON(['message' => 'Email and password are required'], 400);
+    }
+
+    // BRUTE-FORCE PROTECTION: block further attempts if this email or this
+    // IP has racked up too many failed logins recently. Checked before the
+    // password is even verified.
+    try {
+        $windowStart = date('Y-m-d H:i:s', strtotime('-' . LOGIN_LOCKOUT_MINUTES . ' minutes'));
+
+        $checkStmt = $conn->prepare(
+            "SELECT COUNT(*) as attempts FROM login_attempts
+             WHERE attempted_at > :window AND (email = :email OR ip_address = :ip)"
+        );
+        $checkStmt->execute([':window' => $windowStart, ':email' => $email, ':ip' => $ip]);
+        $attemptCount = (int) $checkStmt->fetch(PDO::FETCH_ASSOC)['attempts'];
+
+        if ($attemptCount >= LOGIN_MAX_ATTEMPTS) {
+            returnJSON([
+                'message' => 'Too many failed login attempts. Please try again in ' . LOGIN_LOCKOUT_MINUTES . ' minutes.'
+            ], 429);
+        }
+    }
+    catch (PDOException $e) {
+        // If the rate-limit check itself fails, don't block real logins —
+        // fail open on this check specifically.
     }
 
     // $conn is already established by config.php
@@ -56,6 +93,14 @@ try {
             $_SESSION['username'] = $user['username'];
             $_SESSION['email'] = $user['email'];
             $_SESSION['role'] = $user['role'];
+
+            // Successful login clears this account's recent failed attempts.
+            try {
+                $clearStmt = $conn->prepare("DELETE FROM login_attempts WHERE email = :email");
+                $clearStmt->execute([':email' => $email]);
+            }
+            catch (PDOException $e) {
+            }
 
             try {
                 $logStmt = $conn->prepare("INSERT INTO system_logs (user_id, action, description) VALUES (:user_id, 'login', 'User logged in successfully')");
@@ -76,10 +121,12 @@ try {
             ]);
         }
         else {
+            recordFailedAttempt($conn, $email, $ip);
             returnJSON(['message' => 'Invalid credentials'], 401);
         }
     }
     else {
+        recordFailedAttempt($conn, $email, $ip);
         returnJSON(['message' => 'Invalid credentials'], 401);
     }
 

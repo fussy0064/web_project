@@ -53,7 +53,22 @@ try {
     }
 
     // Handle File Upload if present
+    if ($isFormData && isset($_FILES['image']) &&
+        ($_FILES['image']['error'] === UPLOAD_ERR_INI_SIZE || $_FILES['image']['error'] === UPLOAD_ERR_FORM_SIZE)) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Image too large. Max size is ' . (MAX_UPLOAD_BYTES / 1024 / 1024) . 'MB']);
+        exit;
+    }
+
     if ($isFormData && isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        // App-level size cap, independent of php.ini's
+        // upload_max_filesize/post_max_size.
+        if ($_FILES['image']['size'] > MAX_UPLOAD_BYTES) {
+            http_response_code(400);
+            echo json_encode(['message' => 'Image too large. Max size is ' . (MAX_UPLOAD_BYTES / 1024 / 1024) . 'MB']);
+            exit;
+        }
+
         // SECURITY FIX: previously any file extension was accepted (e.g. a
         // "shell.php" upload would have been saved into a web-served
         // directory and could be executed). Whitelist extensions and verify
@@ -78,11 +93,23 @@ try {
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
-        $file_name = uniqid() . '.' . $file_extension;
-        $upload_path = $upload_dir . $file_name;
 
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
-            $data['image_url'] = 'uploads/' . $file_name;
+        $imageUploadWarning = null;
+        if (!is_writable($upload_dir)) {
+            error_log('Upload directory not writable: ' . realpath($upload_dir));
+            $imageUploadWarning = 'Product saved, but the image could not be updated (server upload directory is not writable).';
+        }
+        else {
+            $file_name = uniqid() . '.' . $file_extension;
+            $upload_path = $upload_dir . $file_name;
+
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                $data['image_url'] = 'uploads/' . $file_name;
+            }
+            else {
+                error_log('move_uploaded_file failed writing to: ' . $upload_path);
+                $imageUploadWarning = 'Product saved, but the image failed to upload.';
+            }
         }
     }
     // If we're updating and NOT uploading a new file, but client sent image_url, keep it.
@@ -116,7 +143,9 @@ try {
     $stmt = $conn->prepare($sql);
     $stmt->execute($params);
 
-    echo json_encode(['message' => 'Product updated successfully']);
+    echo json_encode([
+        'message' => $imageUploadWarning ?? 'Product updated successfully'
+    ]);
 
     // Log action
     try {

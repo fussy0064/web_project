@@ -125,6 +125,15 @@ CREATE TABLE inventory_logs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Login attempts (for brute-force rate limiting on auth/login.php)
+CREATE TABLE login_attempts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(150) NOT NULL,
+    ip_address VARCHAR(45),
+    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_email_time (email, attempted_at)
+);
+
 -- Contact messages table (used by public/api/contact_submit.php)
 CREATE TABLE contact_messages (
     id INT PRIMARY KEY AUTO_INCREMENT,

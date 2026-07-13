@@ -13,6 +13,12 @@ define('DB_PASS', ''); // Standard XAMPP password (usually empty)
 // define('BASE_URL', 'http://localhost/Electronics_Ordering_System/web_project/public');
 define('BASE_URL', '/Electronics_Ordering_System/web_project/public');
 
+// Shared limits used across auth/products endpoints.
+define('MAX_UPLOAD_BYTES', 5 * 1024 * 1024); // 5MB app-level cap, independent of php.ini
+define('MIN_PASSWORD_LENGTH', 8);
+define('LOGIN_MAX_ATTEMPTS', 5);
+define('LOGIN_LOCKOUT_MINUTES', 15);
+
 function getDBConnection()
 {
     try {
@@ -49,6 +55,27 @@ if (in_array($origin, $allowedOrigins, true)) {
 }
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// Session cookie hardening. Detects HTTPS (including behind a reverse proxy
+// via X-Forwarded-Proto, common on EC2/load balancers) so cookies get the
+// Secure flag automatically once you're on HTTPS, without breaking local
+// HTTP development. SameSite=Lax blocks the cookie being sent on
+// cross-site requests (CSRF-style), while still allowing normal top-level
+// navigation (e.g. following a link into the site).
+$isHttps = (
+    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+    (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ||
+    (($_SERVER['SERVER_PORT'] ?? '') == 443)
+);
+
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => $isHttps,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
 
 // Start session
 if (session_status() === PHP_SESSION_NONE) {

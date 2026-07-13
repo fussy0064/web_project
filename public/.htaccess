@@ -16,6 +16,17 @@ RewriteBase /Electronics_Ordering_System/web_project/public/
     Deny from all
 </FilesMatch>
 
+# Product image uploads: raise PHP's own limits to match the app's 5MB cap
+# (products/create.php and update.php enforce MAX_UPLOAD_BYTES themselves,
+# but if upload_max_filesize/post_max_size in php.ini are lower than that,
+# PHP silently truncates/rejects the upload before the app ever sees it).
+# Only takes effect under mod_php; if you're on php-fpm, set these in your
+# pool's php.ini or php_admin_value in the Apache/Nginx vhost instead.
+<IfModule mod_php.c>
+    php_value upload_max_filesize 5M
+    php_value post_max_size 6M
+</IfModule>
+
 # Remove .php extension
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f

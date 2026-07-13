@@ -36,8 +36,8 @@ try {
         returnJSON(['message' => 'Invalid email format'], 400);
     }
 
-    if (strlen($password) < 6) {
-        returnJSON(['message' => 'Password must be at least 6 characters'], 400);
+    if (strlen($password) < MIN_PASSWORD_LENGTH) {
+        returnJSON(['message' => 'Password must be at least ' . MIN_PASSWORD_LENGTH . ' characters'], 400);
     }
 
     $conn = getDBConnection();
