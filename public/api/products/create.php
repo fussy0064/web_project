@@ -26,10 +26,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $warranty = $_POST['warranty'] ?? 'No warranty';
 
         // Handle file upload
-        // Handle file upload
         $image_url = '';
         if (isset($_FILES['image'])) {
             if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                // SECURITY FIX: previously any file extension was accepted and saved
+                // directly into a web-served directory (e.g. a file named
+                // "shell.php" would have been saved and could be executed by
+                // Apache). Now we whitelist extensions AND verify the upload is
+                // actually a real image using getimagesize().
+                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+
+                if (!in_array($file_extension, $allowed_extensions, true)) {
+                    http_response_code(400);
+                    echo json_encode(['message' => 'Invalid image type. Allowed: jpg, jpeg, png, gif, webp']);
+                    exit;
+                }
+
+                $imageInfo = @getimagesize($_FILES['image']['tmp_name']);
+                if ($imageInfo === false) {
+                    http_response_code(400);
+                    echo json_encode(['message' => 'Uploaded file is not a valid image']);
+                    exit;
+                }
+
                 // Use absolute path for reliability
                 $upload_dir = __DIR__ . '/../../uploads/';
                 if (!file_exists($upload_dir)) {
@@ -40,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
                 $file_name = uniqid() . '.' . $file_extension;
                 $upload_path = $upload_dir . $file_name;
 

@@ -1,25 +1,8 @@
 <?php
-header('Content-Type: application/json');
-
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Database connection
-try {
-    $host = 'localhost';
-    $dbname = 'electronics_db';
-    $username = 'root';
-    $password = '';
-
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-}
-catch (PDOException $e) {
-    echo json_encode(['message' => 'Database error: ' . $e->getMessage()]);
-    exit;
-}
+// Use the shared config (DB connection, CORS, JSON header) instead of a
+// separate hardcoded DB connection block, so DB credential changes in
+// config.php actually take effect here too.
+require_once __DIR__ . '/config.php';
 
 // Get JSON input
 $data = json_decode(file_get_contents('php://input'), true);
@@ -49,11 +32,11 @@ $subject = isset($data['subject']) ? htmlspecialchars(strip_tags($data['subject'
 $message = htmlspecialchars(strip_tags($data['message']));
 
 try {
-    // Insert into DB
-    $stmt = $pdo->prepare("INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)");
+    // Insert into DB ($conn comes from config.php)
+    $stmt = $conn->prepare("INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)");
     $stmt->execute([$name, $email, $subject, $message]);
 
-    echo json_encode(['message' => 'Thank you! Your message has been sent successfully.', 'id' => $pdo->lastInsertId()]);
+    echo json_encode(['message' => 'Thank you! Your message has been sent successfully.', 'id' => $conn->lastInsertId()]);
 }
 catch (PDOException $e) {
     http_response_code(500);

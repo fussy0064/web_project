@@ -6,29 +6,12 @@ ob_start();
 ini_set('display_errors', 0);
 error_reporting(0);
 
-// Start session before any output
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Database configuration
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'electronics_db');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-
-function getDBConnection()
-{
-    try {
-        $conn = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        return $conn;
-    }
-    catch (PDOException $e) {
-        return null;
-    }
-}
+// Use the shared config (DB connection, session, CORS, JSON header) instead
+// of a separate hardcoded DB connection. This used to define its own
+// DB_HOST/DB_USER/DB_PASS constants (pointed at 'localhost' instead of
+// config.php's '127.0.0.1'), so changing DB credentials in config.php for
+// production would silently NOT apply here.
+require_once __DIR__ . '/../config.php';
 
 function returnJSON($data, $code = 200)
 {
@@ -36,24 +19,12 @@ function returnJSON($data, $code = 200)
     if (ob_get_length())
         ob_clean();
 
-    // Set headers
     http_response_code($code);
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
-
     echo json_encode($data);
     exit;
 }
 
 try {
-    // Handle OPTIONS request
-    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-        http_response_code(200);
-        exit;
-    }
-
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         returnJSON(['message' => 'Method not allowed'], 405);
     }
@@ -72,12 +43,7 @@ try {
         returnJSON(['message' => 'Email and password are required'], 400);
     }
 
-    $conn = getDBConnection();
-
-    if (!$conn) {
-        returnJSON(['message' => 'Database connection failed'], 500);
-    }
-
+    // $conn is already established by config.php
     $stmt = $conn->prepare("SELECT id, username, email, password_hash, role FROM users WHERE email = :email");
     $stmt->bindParam(':email', $email);
     $stmt->execute();
@@ -96,7 +62,7 @@ try {
                 $logStmt->execute([':user_id' => $user['id']]);
             }
             catch (PDOException $e) {
-            // Ignore log error
+                // Ignore log error
             }
 
             returnJSON([

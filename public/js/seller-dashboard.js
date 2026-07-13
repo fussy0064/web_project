@@ -1,5 +1,17 @@
 const API_BASE = '/Electronics_Ordering_System/web_project/public/api';
 
+// SECURITY: product names and customer usernames are user-controlled and
+// were injected into innerHTML with no escaping — escape before use.
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     initApp();
 });
@@ -64,7 +76,7 @@ window.loadProducts = function () {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${p.id}</td>
-                    <td>${p.name}</td>
+                    <td>${escapeHtml(p.name)}</td>
                     <td>TSh ${parseFloat(p.price).toLocaleString()}</td>
                     <td>${p.stock_quantity}</td>
                     <td>${p.status}</td>
@@ -165,7 +177,7 @@ window.loadOrders = function () {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>#${o.id}</td>
-                    <td>${o.customer_name || 'Unknown'}</td>
+                    <td>${escapeHtml(o.customer_name) || 'Unknown'}</td>
                     <td>${o.item_count || 0}</td>
                     <td>${new Date(o.created_at).toLocaleDateString()}</td>
                     <td>
@@ -210,8 +222,8 @@ window.loadNotifications = function () {
             }
             list.innerHTML = notifs.map(n => `
                 <div class="notif-item ${n.is_read ? '' : 'unread'}">
-                    <strong>${n.title}</strong>
-                    <p>${n.message}</p>
+                    <strong>${escapeHtml(n.title)}</strong>
+                    <p>${escapeHtml(n.message)}</p>
                     <small>${new Date(n.created_at).toLocaleString()}</small>
                 </div>
             `).join('');

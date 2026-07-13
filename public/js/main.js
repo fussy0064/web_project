@@ -1,3 +1,17 @@
+// SECURITY: product name/description and seller_name are user-controlled
+// (sellers create their own listings) and were injected into innerHTML with
+// no escaping — a malicious product name could execute script in every
+// visitor's browser. Escape before use.
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     // Check user login status
     const userStatus = document.getElementById('userStatus');
@@ -124,15 +138,15 @@ function loadFeaturedItems() {
                 itemEl.className = 'menu-item';
                 itemEl.innerHTML = `
                     <div class="item-image">
-                        <img src="${imgPath}" alt="${item.name}">
+                        <img src="${escapeHtml(imgPath)}" alt="${escapeHtml(item.name)}">
                     </div>
                     <div class="item-content">
                         <div class="item-header">
-                            <h3 class="item-title">${item.name}</h3>
+                            <h3 class="item-title">${escapeHtml(item.name)}</h3>
                             <span class="item-price">TSh ${item.price}</span>
                         </div>
-                        <span class="item-restaurant">by ${item.seller_name || 'ElectroHub'}</span>
-                        <p class="item-desc">${item.description || 'Quality electronics product.'}</p>
+                        <span class="item-restaurant">by ${escapeHtml(item.seller_name) || 'ElectroHub'}</span>
+                        <p class="item-desc">${escapeHtml(item.description) || 'Quality electronics product.'}</p>
                         <button class="btn-add-cart" onclick="addToCart(${item.id})">Add to Cart</button>
                     </div>
                 `;

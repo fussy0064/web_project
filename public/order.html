@@ -969,13 +969,28 @@
     </div>
 
     <script>
+        // SECURITY: product name/description/image and seller name are
+        // user-controlled (sellers set these on their listings, and
+        // image_url can even be set directly to any string via the API
+        // without an actual file upload) and were injected into innerHTML
+        // with no escaping. Escape before use to prevent stored XSS.
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         // Food items array - will be loaded from API
         let foodItems = [];
 
         // Load food items from API
         // Load food items from API
         function loadFoodItemsFromAPI() {
-            fetch('../../public/api/products/get_products.php')
+            fetch('/Electronics_Ordering_System/web_project/public/api/products/get_products.php')
                 .then(res => {
                     if (!res.ok) throw new Error('Network response was not ok');
                     return res.json();
@@ -1151,18 +1166,18 @@
                 foodItem.className = 'food-item-card';
                 foodItem.innerHTML = `
                     <div class="food-image">
-                        <img src="${item.image || 'https://images.unsplash.com/photo-1550009158-9ebf69173e03'}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1550009158-9ebf69173e03'">
+                        <img src="${escapeHtml(item.image) || 'https://images.unsplash.com/photo-1550009158-9ebf69173e03'}" alt="${escapeHtml(item.name)}" onerror="this.src='https://images.unsplash.com/photo-1550009158-9ebf69173e03'">
                     </div>
                     <div class="food-info">
                         <div class="food-header">
-                            <h3>${item.name}</h3>
+                            <h3>${escapeHtml(item.name)}</h3>
                             <div class="food-price">${formatCurrency(item.price)}</div>
                         </div>
-                        <p class="food-description">${item.description}</p>
+                        <p class="food-description">${escapeHtml(item.description)}</p>
                         <div class="food-meta">
                             <div class="food-restaurant">
                                 <div class="restaurant-icon">🍽️</div>
-                                <span>${item.restaurant}</span>
+                                <span>${escapeHtml(item.restaurant)}</span>
                             </div>
                             <div class="food-rating">
                                 ⭐ ${item.rating} • ${item.deliveryTime}
@@ -1174,7 +1189,7 @@
                                 <span class="quantity">${quantity}</span>
                                 <button class="quantity-btn plus" data-id="${item.id}">+</button>
                             </div>
-                            <button class="add-to-cart" data-item='${JSON.stringify(item)}'>
+                            <button class="add-to-cart" data-item='${JSON.stringify(item).replace(/'/g, "&#39;")}'>
                                 ${quantity > 0 ? 'Update' : 'Add to Cart'}
                             </button>
                         </div>
@@ -1247,11 +1262,11 @@
                     cartItem.className = 'cart-item';
                     cartItem.innerHTML = `
                         <div class="cart-item-image">
-                            <img src="${item.image || 'https://images.unsplash.com/photo-1550009158-9ebf69173e03'}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1550009158-9ebf69173e03'">
+                            <img src="${escapeHtml(item.image) || 'https://images.unsplash.com/photo-1550009158-9ebf69173e03'}" alt="${escapeHtml(item.name)}" onerror="this.src='https://images.unsplash.com/photo-1550009158-9ebf69173e03'">
                         </div>
                         <div class="cart-item-info">
-                            <h5>${item.name}</h5>
-                            <div class="cart-item-restaurant">${item.restaurant}</div>
+                            <h5>${escapeHtml(item.name)}</h5>
+                            <div class="cart-item-restaurant">${escapeHtml(item.restaurant)}</div>
                             <div class="cart-item-actions">
                                 <div class="cart-quantity">
                                     <button class="cart-quantity-btn minus" data-id="${item.id}">-</button>

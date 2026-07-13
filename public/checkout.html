@@ -207,6 +207,18 @@
     </div>
 
     <script>
+        // SECURITY: product name is user-controlled (sellers set it on
+        // their listings) and was injected into innerHTML with no escaping.
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         // Check if pending order exists
         let pendingOrder = null;
         try {
@@ -239,7 +251,7 @@
                 <div class="item-info">
                     <div style="background:#eee; width:50px; height:50px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">📦</div>
                     <div>
-                        <div style="font-weight:600">${item.name}</div>
+                        <div style="font-weight:600">${escapeHtml(item.name)}</div>
                         <div style="font-size:0.9rem; color:#666">Qty: ${item.quantity}</div>
                     </div>
                 </div>

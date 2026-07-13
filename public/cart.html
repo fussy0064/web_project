@@ -826,6 +826,21 @@
             return `Tshs ${amount.toLocaleString()}`;
         }
 
+        // SECURITY: product name/description/image and seller name are
+        // user-controlled (sellers set these on their listings, and
+        // image_url can even be set directly to any string via the API
+        // without an actual file upload) and were injected into innerHTML
+        // with no escaping. Escape before use to prevent stored XSS.
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         // Cart state
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let promoDiscount = 0;
@@ -927,7 +942,7 @@
                 restaurantHeader.className = 'restaurant-badge';
                 restaurantHeader.innerHTML = `
                     <span>🍽️</span>
-                    <span>${restaurantName}</span>
+                    <span>${escapeHtml(restaurantName)}</span>
                 `;
                 cartItemsList.appendChild(restaurantHeader);
 
@@ -937,17 +952,17 @@
                     cartItem.className = 'cart-item-card';
                     cartItem.innerHTML = `
                         <div class="item-image">
-                            <img src="${item.image}" alt="${item.name}">
+                            <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
                         </div>
                         <div class="item-details">
                             <div class="item-header">
-                                <h3>${item.name}</h3>
+                                <h3>${escapeHtml(item.name)}</h3>
                                 <div class="item-price">${formatCurrency(item.price * item.quantity)}</div>
                             </div>
-                            <p class="item-description">${item.description}</p>
+                            <p class="item-description">${escapeHtml(item.description)}</p>
                             <div class="item-restaurant">
                                 <span>🍽️</span>
-                                <span>${item.restaurantName}</span>
+                                <span>${escapeHtml(item.restaurantName)}</span>
                             </div>
                             <div class="item-actions">
                                 <div class="quantity-control">

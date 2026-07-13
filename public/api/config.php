@@ -27,13 +27,28 @@ function getDBConnection()
     }
 }
 
-// Enable CORS
-// Allow requests from the current origin (likely localhost)
-$origin = $_SERVER['HTTP_ORIGIN'] ?? 'http://localhost';
-header("Access-Control-Allow-Origin: " . $origin);
+// SECURITY FIX: this used to reflect *any* requester's Origin header back
+// as an allowed origin while also allowing credentials (cookies). That
+// combination lets any malicious website make credentialed requests using
+// a logged-in visitor's session (their browser would attach the session
+// cookie automatically) and read the response. Restrict to known origins.
+//
+// Add your real production domain(s) here (e.g. 'https://your-domain.com').
+$allowedOrigins = [
+    'http://localhost',
+    'http://127.0.0.1',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    // 'https://your-production-domain.com',
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins, true)) {
+    header("Access-Control-Allow-Origin: " . $origin);
+    header("Access-Control-Allow-Credentials: true");
+}
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
 
 // Start session
 if (session_status() === PHP_SESSION_NONE) {

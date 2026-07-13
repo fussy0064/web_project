@@ -54,11 +54,30 @@ try {
 
     // Handle File Upload if present
     if ($isFormData && isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        // SECURITY FIX: previously any file extension was accepted (e.g. a
+        // "shell.php" upload would have been saved into a web-served
+        // directory and could be executed). Whitelist extensions and verify
+        // the upload is actually a real image using getimagesize().
+        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+
+        if (!in_array($file_extension, $allowed_extensions, true)) {
+            http_response_code(400);
+            echo json_encode(['message' => 'Invalid image type. Allowed: jpg, jpeg, png, gif, webp']);
+            exit;
+        }
+
+        $imageInfo = @getimagesize($_FILES['image']['tmp_name']);
+        if ($imageInfo === false) {
+            http_response_code(400);
+            echo json_encode(['message' => 'Uploaded file is not a valid image']);
+            exit;
+        }
+
         $upload_dir = __DIR__ . '/../../uploads/';
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
-        $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         $file_name = uniqid() . '.' . $file_extension;
         $upload_path = $upload_dir . $file_name;
 

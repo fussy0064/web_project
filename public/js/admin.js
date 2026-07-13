@@ -4,6 +4,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
 const API_BASE = '/Electronics_Ordering_System/web_project/public/api';
 
+// SECURITY: usernames, customer names, and product names/descriptions are
+// all user-controlled (via registration or seller product listings) and
+// were previously injected into innerHTML with no escaping — a malicious
+// username or product name (e.g. containing <script> or an onerror= image)
+// would execute in whoever views this admin dashboard. Escape before use.
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function initApp() {
     // Check Auth
     const user = JSON.parse(localStorage.getItem('user'));
@@ -102,8 +117,8 @@ window.loadOrders = function () {
             orders.forEach(o => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${o.order_number || '#' + o.id}</td>
-                    <td>${o.customer_name || 'Unknown'}</td>
+                    <td>${escapeHtml(o.order_number || '#' + o.id)}</td>
+                    <td>${escapeHtml(o.customer_name) || 'Unknown'}</td>
                     <td>${o.item_count || 0}</td>
                     <td>${new Date(o.created_at).toLocaleDateString()}</td>
                     <td>
@@ -200,9 +215,9 @@ window.loadUsers = function () {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${u.id}</td>
-                    <td>${u.username}</td>
-                    <td>${u.email}</td>
-                    <td>${u.role}</td>
+                    <td>${escapeHtml(u.username)}</td>
+                    <td>${escapeHtml(u.email)}</td>
+                    <td>${escapeHtml(u.role)}</td>
                     <td>
                         <button class="btn btn-sm btn-primary" onclick="promoteUser(${u.id}, '${u.role}')">Role</button>
                         <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})">Del</button>
@@ -248,8 +263,8 @@ window.loadMenu = function () {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${i.id}</td>
-                    <td>${i.name}</td>
-                    <td>${i.seller_name || 'ID: ' + i.seller_id}</td>
+                    <td>${escapeHtml(i.name)}</td>
+                    <td>${escapeHtml(i.seller_name) || 'ID: ' + i.seller_id}</td>
                     <td>TSh ${i.price}</td>
                     <td>${i.is_available == 1 ? 'Yes' : 'No'}</td>
                     <td>

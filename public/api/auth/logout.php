@@ -6,22 +6,9 @@ ob_start();
 ini_set('display_errors', 0);
 error_reporting(0);
 
-// Start session
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Set headers
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-// Handle OPTIONS
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+// Use the shared config (session, CORS, JSON header) instead of a separate
+// hardcoded DB connection block (this file didn't even need a DB connection).
+require_once __DIR__ . '/../config.php';
 
 try {
     // Destroy session

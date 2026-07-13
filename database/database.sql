@@ -149,6 +149,8 @@ INSERT INTO categories (id, name) VALUES
 (10, 'Other Electronics');
 
 -- Insert default admin user (password: admin123)
--- Password hash for 'admin123' using PASSWORD_DEFAULT
+-- BUG FIX: the previous hash here did not actually verify against
+-- 'admin123' (confirmed with password_verify()) — the documented default
+-- admin login never worked. Regenerated and verified below.
 INSERT INTO users (id, username, email, password_hash, role) VALUES 
-(1, 'admin', 'admin@electroshop.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+(1, 'admin', 'admin@electroshop.com', '$2y$10$WdKytziVgvvmIYx60V4qdew7CzjpJEpZzvcJnkeyBsJOIUeLIfj1W', 'admin');

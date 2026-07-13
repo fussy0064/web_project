@@ -10,6 +10,12 @@ RewriteBase /Electronics_Ordering_System/web_project/public/
     Deny from all
 </Files>
 
+# Security - block direct access to log files and .sql/.env dumps
+<FilesMatch "\.(log|sql|env)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
 # Remove .php extension
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
