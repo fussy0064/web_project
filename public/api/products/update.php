@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json');
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../lib/storage.php';
 // Ensure session is started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -89,26 +90,39 @@ try {
             exit;
         }
 
-        $upload_dir = __DIR__ . '/../../uploads/';
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-
+        $mimeType = $imageInfo['mime'] ?? 'application/octet-stream';
+        $file_name = uniqid() . '.' . $file_extension;
         $imageUploadWarning = null;
-        if (!is_writable($upload_dir)) {
-            error_log('Upload directory not writable: ' . realpath($upload_dir));
-            $imageUploadWarning = 'Product saved, but the image could not be updated (server upload directory is not writable).';
+
+        if (isExternalStorageConfigured()) {
+            try {
+                $data['image_url'] = uploadToR2($_FILES['image']['tmp_name'], 'products/' . $file_name, $mimeType);
+            }
+            catch (Exception $e) {
+                error_log('R2 upload failed: ' . $e->getMessage());
+                $imageUploadWarning = 'Product saved, but the image failed to upload.';
+            }
         }
         else {
-            $file_name = uniqid() . '.' . $file_extension;
-            $upload_path = $upload_dir . $file_name;
+            $upload_dir = __DIR__ . '/../../uploads/';
+            if (!file_exists($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
 
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
-                $data['image_url'] = 'uploads/' . $file_name;
+            if (!is_writable($upload_dir)) {
+                error_log('Upload directory not writable: ' . realpath($upload_dir));
+                $imageUploadWarning = 'Product saved, but the image could not be updated (server upload directory is not writable).';
             }
             else {
-                error_log('move_uploaded_file failed writing to: ' . $upload_path);
-                $imageUploadWarning = 'Product saved, but the image failed to upload.';
+                $upload_path = $upload_dir . $file_name;
+
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                    $data['image_url'] = 'uploads/' . $file_name;
+                }
+                else {
+                    error_log('move_uploaded_file failed writing to: ' . $upload_path);
+                    $imageUploadWarning = 'Product saved, but the image failed to upload.';
+                }
             }
         }
     }

@@ -5,7 +5,9 @@ listings, cart & checkout, order tracking, and admin/seller dashboards.
 
 **Stack:** Plain PHP 8 (no framework) + MySQL/PDO on the backend, plain
 HTML/CSS/JavaScript on the frontend. Designed to run under Apache (e.g.
-XAMPP) or any PHP-capable web server.
+XAMPP) or any PHP-capable web server — or see
+[Deploying to Vercel](#deploying-to-vercel-with-aiven-mysql--cloudflare-r2)
+below for a serverless option.
 
 ## Setup (XAMPP / Apache + PHP + MySQL)
 
@@ -35,6 +37,92 @@ XAMPP) or any PHP-capable web server.
 
 4. Start Apache + MySQL and open
    `http://localhost/Electronics_Ordering_System/web_project/public/`.
+
+## Deploying to Vercel (with Aiven MySQL + Cloudflare R2)
+
+Vercel doesn't run PHP or host a database natively, so this deployment
+combines three services: **Vercel** (frontend + PHP via a community
+runtime), **Aiven** (managed MySQL), and **Cloudflare R2** (S3-compatible
+object storage for product images, since Vercel Functions have no
+persistent local disk).
+
+### 1. Database (Aiven)
+
+1. Create a free MySQL service at [aiven.io](https://aiven.io).
+2. From the service's "Overview" page, note the **Host**, **Port**,
+   **User**, **Password**, and **Database name** (usually `defaultdb`).
+3. Load the schema. From your own machine (not this deployment), with the
+   `mysql` client:
+   ```bash
+   mysql --host=<HOST> --port=<PORT> --user=<USER> -p --ssl-mode=REQUIRED <DATABASE> < database/database.sql
+   ```
+   (Aiven's console may also offer a browser-based query tool if you'd
+   rather paste the file contents there instead.)
+
+### 2. Object storage (Cloudflare R2)
+
+1. In the Cloudflare dashboard, go to R2 → create a bucket.
+2. Create an R2 API token (R2 → Manage API Tokens) with **read+write**
+   access to that bucket. Note the **Access Key ID** and **Secret Access
+   Key** shown (only shown once).
+3. Note your **Account ID** (shown in the R2 overview page URL/sidebar).
+4. Either enable the bucket's public `r2.dev` URL, or connect a custom
+   domain to it, and note that public base URL.
+
+### 3. Vercel project
+
+1. Import this repo into Vercel.
+2. **Project Settings → General → Root Directory**: set to `public`
+   (this is what makes `public/index.html` serve at `/`, and
+   `public/api/auth/login.php` serve at `/api/auth/login.php`, matching
+   every hardcoded path already in the frontend JS).
+3. **Project Settings → Environment Variables**, add:
+
+   | Variable | Value |
+   |---|---|
+   | `DB_HOST` | from Aiven |
+   | `DB_PORT` | from Aiven |
+   | `DB_USER` | from Aiven |
+   | `DB_PASS` | from Aiven |
+   | `DB_NAME` | from Aiven (`defaultdb`) |
+   | `APP_ORIGIN` | your Vercel URL, e.g. `https://electro-hub-topaz.vercel.app` |
+   | `R2_ACCOUNT_ID` | from Cloudflare |
+   | `R2_ACCESS_KEY_ID` | from Cloudflare |
+   | `R2_SECRET_ACCESS_KEY` | from Cloudflare |
+   | `R2_BUCKET` | your bucket name |
+   | `R2_PUBLIC_URL` | your bucket's public base URL |
+   | `DIAGNOSTIC_KEY` | any random string you make up, for step 4 below |
+
+   `VERCEL=1` and `USE_DB_SESSIONS` don't need to be set manually — Vercel
+   sets `VERCEL=1` automatically, which `config.php` already detects to
+   switch on DB-backed sessions and the smaller (4MB) upload cap.
+
+4. Deploy, then **verify before using the real app**:
+   - `https://<your-app>/api/_diagnostics/test_db.php?key=<DIAGNOSTIC_KEY>`
+     should return `"db_connected": true`.
+   - `https://<your-app>/api/_diagnostics/test_storage.php?key=<DIAGNOSTIC_KEY>`
+     should return `"upload_succeeded": true` with a working
+     `uploaded_url` you can open in a browser.
+   - **Delete both files under `public/api/_diagnostics/` once confirmed**
+     — they're meant to be temporary and shouldn't stay in production.
+
+### Known constraints of this setup
+
+- **Vercel's Hobby (free) plan is non-commercial only** per its terms — if
+  this ever takes real payments, you need Vercel Pro ($20/mo).
+- **Aiven's free tier auto-sleeps after inactivity** — the first request
+  after a quiet period may be slow while it wakes up. Fine for a demo;
+  consider a paid tier or self-hosting on EC2 (like your other projects)
+  for something meant to stay reliably live.
+- **R2's PHP integration here isn't officially documented** — it's
+  implemented directly against R2's S3-compatible API using the standard,
+  publicly-documented AWS Signature V4 algorithm (verified byte-for-byte
+  against AWS's own published test vectors), not a reverse-engineered
+  proprietary contract. Still, test it via the diagnostic endpoint above
+  before trusting it with real product images.
+- **Uploads are capped at 4MB on Vercel** (`UPLOAD_MAX_MB` env var),
+  below Vercel Functions' hard 4.5MB request body limit — this is a
+  platform limit, not something this app's code can raise.
 
 ## Security fixes made
 

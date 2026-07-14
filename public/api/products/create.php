@@ -1,5 +1,6 @@
 <?php
 require_once '../config.php';
+require_once '../lib/storage.php';
 
 // Check if user is seller or admin
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'seller' && $_SESSION['role'] !== 'admin')) {
@@ -59,34 +60,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 }
 
-                // Use absolute path for reliability
-                $upload_dir = __DIR__ . '/../../uploads/';
-                if (!file_exists($upload_dir)) {
-                    if (!mkdir($upload_dir, 0777, true)) {
+                $mimeType = $imageInfo['mime'] ?? 'application/octet-stream';
+                $file_name = uniqid() . '.' . $file_extension;
+
+                if (isExternalStorageConfigured()) {
+                    // External object storage (e.g. Cloudflare R2) - required
+                    // on stateless hosts like Vercel where local disk doesn't
+                    // persist between requests.
+                    try {
+                        $image_url = uploadToR2($_FILES['image']['tmp_name'], 'products/' . $file_name, $mimeType);
+                    }
+                    catch (Exception $e) {
+                        error_log('R2 upload failed: ' . $e->getMessage());
                         http_response_code(500);
-                        echo json_encode(['message' => 'Failed to create upload directory']);
+                        echo json_encode(['message' => 'Failed to upload image to storage. Contact the administrator.']);
                         exit;
                     }
                 }
-
-                if (!is_writable($upload_dir)) {
-                    error_log('Upload directory not writable: ' . realpath($upload_dir));
-                    http_response_code(500);
-                    echo json_encode(['message' => 'Server upload directory is not writable. Contact the administrator.']);
-                    exit;
-                }
-
-                $file_name = uniqid() . '.' . $file_extension;
-                $upload_path = $upload_dir . $file_name;
-
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
-                    $image_url = 'uploads/' . $file_name;
-                }
                 else {
-                    error_log('move_uploaded_file failed writing to: ' . $upload_path);
-                    http_response_code(500);
-                    echo json_encode(['message' => 'Failed to save uploaded file. Contact the administrator.']);
-                    exit;
+                    // Local disk (traditional single-server deployment, e.g. XAMPP/EC2)
+                    $upload_dir = __DIR__ . '/../../uploads/';
+                    if (!file_exists($upload_dir)) {
+                        if (!mkdir($upload_dir, 0777, true)) {
+                            http_response_code(500);
+                            echo json_encode(['message' => 'Failed to create upload directory']);
+                            exit;
+                        }
+                    }
+
+                    if (!is_writable($upload_dir)) {
+                        error_log('Upload directory not writable: ' . realpath($upload_dir));
+                        http_response_code(500);
+                        echo json_encode(['message' => 'Server upload directory is not writable. Contact the administrator.']);
+                        exit;
+                    }
+
+                    $upload_path = $upload_dir . $file_name;
+
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                        $image_url = 'uploads/' . $file_name;
+                    }
+                    else {
+                        error_log('move_uploaded_file failed writing to: ' . $upload_path);
+                        http_response_code(500);
+                        echo json_encode(['message' => 'Failed to save uploaded file. Contact the administrator.']);
+                        exit;
+                    }
                 }
             }
             elseif ($_FILES['image']['error'] === UPLOAD_ERR_INI_SIZE || $_FILES['image']['error'] === UPLOAD_ERR_FORM_SIZE) {

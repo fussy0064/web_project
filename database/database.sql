@@ -144,6 +144,20 @@ CREATE TABLE contact_messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- PHP sessions table. On a stateless host (e.g. Vercel serverless functions),
+-- PHP's default file-based session storage doesn't survive between requests,
+-- since each request can run on a different ephemeral instance with no
+-- shared disk. config.php registers a custom session handler (see
+-- DbSessionHandler in config.php) that reads/writes session data here
+-- instead, so login stays working regardless of which instance handles the
+-- next request. Harmless (just unused) on a traditional single-server setup.
+CREATE TABLE sessions (
+    id VARCHAR(128) PRIMARY KEY,
+    data MEDIUMTEXT,
+    last_activity INT NOT NULL,
+    INDEX idx_last_activity (last_activity)
+);
+
 -- Insert default categories
 INSERT INTO categories (id, name) VALUES 
 (1, 'Laptops & Computers'),
