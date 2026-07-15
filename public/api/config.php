@@ -8,11 +8,11 @@ error_reporting(E_ALL);
 // (e.g. set in your Vercel project's Environment Variables, or in a real
 // server's environment), falling back to XAMPP-friendly local defaults so
 // nothing changes for local development.
-define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
-define('DB_PORT', getenv('DB_PORT') ?: '3306');
-define('DB_NAME', getenv('DB_NAME') ?: 'electronics_db');
-define('DB_USER', getenv('DB_USER') ?: 'root'); // Standard XAMPP user
-define('DB_PASS', getenv('DB_PASS') ?: ''); // Standard XAMPP password (usually empty)
+efine('DB_HOST', getenv('DB_HOST') ?: 'mysql-1fa4a2bb-fussy0064-ac9b.b.aivencloud.com');
+define('DB_PORT', getenv('DB_PORT') ?: '11587');
+define('DB_NAME', getenv('DB_NAME') ?: 'defaultdb');
+define('DB_USER', getenv('DB_USER') ?: 'avnadmin'); // Standard XAMPP user
+define('DB_PASS', getenv('DB_PASS') ?: 'AVNS_8v0JMndUjG5kSpmy5tq');
 
 // BASE_URL is only used to prefix OLD-style relative image_url values
 // (e.g. "uploads/xyz.jpg") that were saved before switching to external
@@ -70,7 +70,7 @@ $allowedOrigins = array_filter([
     'http://127.0.0.1',
     'http://localhost:3000',
     'http://localhost:5173',
-    getenv('APP_ORIGIN') ?: null, // e.g. https://electro-hub-topaz.vercel.app
+    getenv('https://electro-hub-topaz.vercel.app') ?: null, // e.g. https://electro-hub-topaz.vercel.app
 ]);
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
